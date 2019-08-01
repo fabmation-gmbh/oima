@@ -72,20 +72,16 @@ func initConfig() {
   if cfgFile != "" {
     viper.SetConfigFile(cfgFile)
   } else {
-    home, err := homedir.Dir()
-    if err != nil {
-      fmt.Println(err)
-      os.Exit(1)
-    }
-
-    viper.AddConfigPath(home)
-    viper.SetConfigName(".oima")
+    viper.AddConfigPath("$HOME/.oima.yaml")
+    viper.AddConfigPath(".")
   }
 
   viper.AutomaticEnv() // read in environment variables that match
 
-  // If a config file is found, read it in.
   if err := viper.ReadInConfig(); err == nil {
     fmt.Println("Using config file:", viper.ConfigFileUsed())
+  } else {
+    _ = fmt.Errorf("No Config File found! Maybe run '%s configure' first?", applicationName)
+    os.Exit(1)
   }
 }
