@@ -1,5 +1,5 @@
-hash: 229a229aaa86e997035df8e254ec8ae779d254a451345e482ec0c5ba2b557e36
-updated: 2019-08-01T23:42:28.831592804+02:00
+hash: a7c2fb5d204cd47e5708e7cf9ff1da0ae60cdfbb4675240b434edfa4dcf1db23
+updated: 2019-08-02T00:09:49.201336339+02:00
 imports:
 - name: github.com/fsnotify/fsnotify
   version: 1485a34d5d5723fea214f5710708e19a831720e4
@@ -39,10 +39,15 @@ imports:
   version: 24fa6976df40757dce6aea913e7b81ade90530e1
 - name: github.com/spf13/viper
   version: b5bf975e5823809fb22c7644d008757f78a4259e
+- name: golang.org/x/crypto
+  version: de0752318171da717af4ce24d0a2e8626afaeb11
+  subpackages:
+  - ssh/terminal
 - name: golang.org/x/sys
   version: b90733256f2e882e81d52f9126de08df5615afd9
   subpackages:
   - unix
+  - windows
 - name: golang.org/x/text
   version: b19bf474d317b857955b12035d2c5acb57ce8b01
   subpackages:
