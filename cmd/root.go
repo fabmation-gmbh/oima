@@ -20,7 +20,6 @@ import (
   "github.com/spf13/cobra"
   "os"
 
-  "github.com/mitchellh/go-homedir"
   "github.com/spf13/viper"
 
   "github.com/fabmation-gmbh/oima/internal"
@@ -28,6 +27,7 @@ import (
 
 
 var cfgFile string
+var applicationName = os.Args[0]
 
 var rootCmd = &cobra.Command{
  Use:   "oima <command> [flags]",
@@ -48,7 +48,7 @@ track of all signed Images.`,
 
 
 func run(cmd *cobra.Command, args []string) {
-
+  // TODO
 }
 
 func Execute() {
@@ -64,7 +64,7 @@ func init() {
   rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oima.yaml)")
 
 
-  rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+  //rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 
