@@ -81,5 +81,18 @@ func configure() error {
 		viper.Set("registry_password", dockerPasswd)
 	}
 
+	err := viper.Unmarshal(&Config)
+	if err != nil {
+		_ = fmt.Errorf("unable to decode into struct, %v", err.Error())
+		return err
+	}
+
+	// save Configuration
+	err = viper.SafeWriteConfig()
+	if err != nil {
+		_ = fmt.Errorf("Error while writing Configuration File: %s", err.Error())
+		return err
+	}
+
 	return nil
 }
