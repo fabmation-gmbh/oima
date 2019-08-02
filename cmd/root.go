@@ -17,16 +17,21 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
 
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/fabmation-gmbh/oima/internal"
 	"github.com/fabmation-gmbh/oima/pkg/config"
 )
 
-var cfgFile string
+
+var (
+	cfgFile string		// Application Config File
+	debug	bool		// Print Debug Messages
+)
+
 var Config config.Configuration
 var applicationName = os.Args[0]
 
@@ -59,6 +64,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oima.yaml)")
+	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Print Debug Messages (defaults to false)")
 
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
