@@ -9,3 +9,6 @@ import:
 - package: golang.org/x/crypto
   subpackages:
   - ssh/terminal
+- package: github.com/google/go-containerregistry
+  subpackages:
+  - pkg/crane

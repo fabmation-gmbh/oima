@@ -1,8 +1,12 @@
-hash: a7c2fb5d204cd47e5708e7cf9ff1da0ae60cdfbb4675240b434edfa4dcf1db23
-updated: 2019-08-02T00:09:49.201336339+02:00
+hash: 007a68a531169400828af38e1365fb21ed45e1f713967fe55a327444734ddc30
+updated: 2019-08-02T12:32:02.893960531+02:00
 imports:
 - name: github.com/fsnotify/fsnotify
   version: 1485a34d5d5723fea214f5710708e19a831720e4
+- name: github.com/google/go-containerregistry
+  version: ef12d49c8daf6a6d72978966d5945e39bb898b4a
+  subpackages:
+  - pkg/crane
 - name: github.com/hashicorp/hcl
   version: cf7d376da96d9cecec7c7483cec2735efe54a410
   subpackages:
