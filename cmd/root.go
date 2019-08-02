@@ -64,10 +64,12 @@ func init() {
 }
 
 func initConfig() {
+	viper.SetConfigName(".oima")
+
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
-		viper.AddConfigPath("$HOME/.oima.yaml")
+		viper.AddConfigPath("$HOME")
 		viper.AddConfigPath(".")
 	}
 
@@ -76,11 +78,11 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	} else {
-		_ = fmt.Errorf("No Config File found! Maybe run '%s configure' first?", applicationName)
+		fmt.Printf("No Config File found! Maybe run '%s configure' first\n", applicationName)
 		os.Exit(1)
 	}
 
-	err := viper.Unmarshal(&Config)
+	err := viper.Unmarshal(Config)
 	if err != nil {
 		_ = fmt.Errorf("unable to decode into struct, %v", err.Error())
 	}
