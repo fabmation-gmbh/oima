@@ -1,0 +1,5 @@
+registry:
+  uri: "https://hub.docker.com"
+  require_auth: False
+  username: ""
+  password: ""
