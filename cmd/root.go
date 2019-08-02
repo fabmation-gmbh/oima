@@ -21,6 +21,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/apsdehal/go-logger"
 
 	"github.com/fabmation-gmbh/oima/internal"
 	"github.com/fabmation-gmbh/oima/pkg/config"
@@ -33,6 +34,7 @@ var (
 )
 
 var Config config.Configuration
+var Log logger.Logger
 var applicationName = os.Args[0]
 
 var rootCmd = &cobra.Command{
@@ -54,8 +56,18 @@ track of all signed Images.`,
 }
 
 func Execute() {
+	// initialize Log
+	Log, err := logger.New(applicationName, 1, os.Stdout)
+	if err != nil {
+		panic(err)
+	}
+
+	if debug {
+		Log.SetLogLevel(logger.DebugLevel)
+	}
+
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		Log.Error(err.Error())
 		os.Exit(1)
 	}
 }
