@@ -35,18 +35,22 @@ import (
 
 // configureCmd represents the configure command
 var configureCmd = &cobra.Command{
+	Hidden: true,
+	Deprecated: "DO NOT USE THIS COMMAND!!",
 	Use:   "configure",
 	Short: "Create and Setup Configuration File",
 	Long: `configure creates a Config File under
  HOME/.oima.yaml and configures it with your Input.`,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		err := configure()
 
 		if err != nil {
 			_ = fmt.Errorf("error while creating Configuration: %s", err.Error())
-			os.Exit(1)
+			return err
 		}
+
+		return nil
 	},
 }
 
@@ -62,12 +66,14 @@ func configure() error {
 	fmt.Println(">>>>> Docker Registry Configuration <<<<<")
 	fmt.Print("Enter Docker Registry URI: ")
 	registryURI, _ := reader.ReadString('\n')
-	viper.Set("registry_uri", registryURI)
+	Config.Regitry.RegistryURI = registryURI
 
 	fmt.Print("Is Authentication Required? [Y|n]: ")
 	authReq, _ := reader.ReadString('\n')
 
 	if len(authReq) == 0 || strings.ToLower(authReq) == "y" {
+		Config.Regitry.RequireAuth = true
+
 		fmt.Print("Enter Username: ")
 		dockerUsername, _ := reader.ReadString('\n')
 		dockerPasswd, _ := terminal.ReadPassword(int(syscall.Stdin))
@@ -77,21 +83,23 @@ func configure() error {
 			os.Exit(1)
 		}
 
-		viper.Set("registry_username", dockerUsername)
-		viper.Set("registry_password", dockerPasswd)
+		Config.Regitry.Username = dockerUsername
+		Config.Regitry.Password = string(dockerPasswd)
 	}
 
-	err := viper.Unmarshal(&Config)
+	err := viper.Unmarshal(Config)
 	if err != nil {
 		_ = fmt.Errorf("unable to decode into struct, %v", err.Error())
 		return err
 	}
 
 	// save Configuration
-	err = viper.SafeWriteConfig()
+	err = viper.WriteConfig()
 	if err != nil {
 		_ = fmt.Errorf("Error while writing Configuration File: %s", err.Error())
 		return err
+	} else {
+		fmt.Println("[INFO] Config File successfully written down :)")
 	}
 
 	return nil
