@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/awnumar/memguard"
 	"github.com/apsdehal/go-logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
