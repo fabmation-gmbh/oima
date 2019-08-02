@@ -12,3 +12,5 @@ import:
 - package: github.com/google/go-containerregistry
   subpackages:
   - pkg/crane
+- package: github.com/apsdehal/go-logger
+  version: ~1.3.0

@@ -1,6 +1,8 @@
-hash: 007a68a531169400828af38e1365fb21ed45e1f713967fe55a327444734ddc30
-updated: 2019-08-02T12:32:02.893960531+02:00
+hash: 957a594e6bb7cea8fd403d3d59f7c7982f852e72ee76f48f42fa7419c149c782
+updated: 2019-08-02T13:24:16.545303461+02:00
 imports:
+- name: github.com/apsdehal/go-logger
+  version: 1abdf898e0242cf7027d832c3e95388315c25de6
 - name: github.com/fsnotify/fsnotify
   version: 1485a34d5d5723fea214f5710708e19a831720e4
 - name: github.com/google/go-containerregistry
