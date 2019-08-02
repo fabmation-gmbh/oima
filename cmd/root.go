@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/apsdehal/go-logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/apsdehal/go-logger"
 
 	"github.com/fabmation-gmbh/oima/internal"
 	"github.com/fabmation-gmbh/oima/pkg/config"
