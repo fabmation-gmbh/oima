@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/fabmation-gmbh/oima/internal"
+	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/config"
 )
 
@@ -35,7 +36,6 @@ var (
 )
 
 var Config config.Configuration
-var Log logger.Logger
 var applicationName = os.Args[0]
 
 var rootCmd = &cobra.Command{
@@ -56,12 +56,7 @@ track of all signed Images.`,
 }
 
 func Execute() {
-	// initialize Log
-	Log, err := logger.New(applicationName, 1, os.Stdout)
-	if err != nil {
-		panic(err)
-	}
-
+	// set Log Level
 	if debug {
 		Log.SetLogLevel(logger.DebugLevel)
 	}
