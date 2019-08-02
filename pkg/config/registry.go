@@ -3,7 +3,8 @@ package config
 import ()
 
 type RegistryConf struct {
-	registryURI	string
-	username	string
-	password	string
+	RegistryURI	string
+	RequireAuth	bool
+	Username	string
+	Password	string
 }
