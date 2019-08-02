@@ -27,7 +27,7 @@ import (
 )
 
 var cfgFile string
-var Config = &config.Configuration{}
+var Config config.Configuration
 var applicationName = os.Args[0]
 
 var rootCmd = &cobra.Command{
@@ -75,15 +75,16 @@ func initConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 
+	// unmarshal Config Struct
+	err := viper.Unmarshal(&Config)
+	if err != nil {
+		_ = fmt.Errorf("unable to decode into struct, %v", err.Error())
+	}
+
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	} else {
 		fmt.Printf("No Config File found! Maybe run '%s configure' first\n", applicationName)
 		os.Exit(1)
-	}
-
-	err := viper.Unmarshal(Config)
-	if err != nil {
-		_ = fmt.Errorf("unable to decode into struct, %v", err.Error())
 	}
 }
