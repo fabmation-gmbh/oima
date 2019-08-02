@@ -18,5 +18,5 @@ package main
 import "github.com/fabmation-gmbh/oima/cmd"
 
 func main() {
-  cmd.Execute()
+	cmd.Execute()
 }
