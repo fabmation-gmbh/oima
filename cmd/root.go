@@ -16,23 +16,24 @@ limitations under the License.
 package cmd
 
 import (
-  "fmt"
-  "github.com/spf13/cobra"
-  "os"
+	"fmt"
+	"github.com/spf13/cobra"
+	"os"
 
-  "github.com/spf13/viper"
+	"github.com/spf13/viper"
 
-  "github.com/fabmation-gmbh/oima/internal"
+	"github.com/fabmation-gmbh/oima/internal"
+	"github.com/fabmation-gmbh/oima/pkg/config"
 )
 
-
 var cfgFile string
+var Config config.Configuration
 var applicationName = os.Args[0]
 
 var rootCmd = &cobra.Command{
- Use:   "oima <command> [flags]",
- Short: "oima Manages OCI/ Docker Image Signatures in you 'sigstore'",
- Long: `oima Manages OCI/ Docker Image Signatures in you 'sigstore'.
+	Use:   "oima <command> [flags]",
+	Short: "oima Manages OCI/ Docker Image Signatures in you 'sigstore'",
+	Long: `oima Manages OCI/ Docker Image Signatures in you 'sigstore'.
 Why? Because its impossible to keep track of all Signatures.
 
 For Example, you have to remove the Signature for the
@@ -42,46 +43,48 @@ manually delete the Directory/ Signature.
 
 This Tool automates this Process and helps to keep
 track of all signed Images.`,
-  Version: internal.GetVersion(),
-  Run: run,
+	Version: internal.GetVersion(),
+	Run:     run,
 }
 
-
 func run(cmd *cobra.Command, args []string) {
-  // TODO
+	// TODO
 }
 
 func Execute() {
-  if err := rootCmd.Execute(); err != nil {
-    fmt.Println(err)
-    os.Exit(1)
-  }
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func init() {
-  cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initConfig)
 
-  rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oima.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oima.yaml)")
 
-
-  //rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-
 func initConfig() {
-  if cfgFile != "" {
-    viper.SetConfigFile(cfgFile)
-  } else {
-    viper.AddConfigPath("$HOME/.oima.yaml")
-    viper.AddConfigPath(".")
-  }
+	if cfgFile != "" {
+		viper.SetConfigFile(cfgFile)
+	} else {
+		viper.AddConfigPath("$HOME/.oima.yaml")
+		viper.AddConfigPath(".")
+	}
 
-  viper.AutomaticEnv() // read in environment variables that match
+	viper.AutomaticEnv() // read in environment variables that match
 
-  if err := viper.ReadInConfig(); err == nil {
-    fmt.Println("Using config file:", viper.ConfigFileUsed())
-  } else {
-    _ = fmt.Errorf("No Config File found! Maybe run '%s configure' first?", applicationName)
-    os.Exit(1)
-  }
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	} else {
+		_ = fmt.Errorf("No Config File found! Maybe run '%s configure' first?", applicationName)
+		os.Exit(1)
+	}
+
+	err := viper.Unmarshal(&Config)
+	if err != nil {
+		_ = fmt.Errorf("unable to decode into struct, %v", err.Error())
+	}
 }
