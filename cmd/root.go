@@ -26,6 +26,7 @@ import (
 
 	"github.com/fabmation-gmbh/oima/internal"
 	"github.com/fabmation-gmbh/oima/pkg/config"
+	"github.com/fabmation-gmbh/oima/pkg/credential"
 )
 
 
@@ -81,6 +82,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Print Debug Messages (defaults to false)")
 
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
 }
 
 func initConfig() {
