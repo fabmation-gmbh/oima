@@ -80,4 +80,6 @@ func configure() error {
 		viper.Set("registry_username", dockerUsername)
 		viper.Set("registry_password", dockerPasswd)
 	}
+
+	return nil
 }
