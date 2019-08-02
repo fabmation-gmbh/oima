@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/awnumar/memguard"
 	"github.com/apsdehal/go-logger"
+	"github.com/awnumar/memguard"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -68,8 +68,10 @@ func Execute() {
 
 	if err := rootCmd.Execute(); err != nil {
 		Log.Error(err.Error())
-		os.Exit(1)
+		memguard.SafeExit(1)
 	}
+
+	memguard.SafeExit(0)
 }
 
 func init() {
@@ -103,6 +105,6 @@ func initConfig() {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	} else {
 		fmt.Printf("No Config File found! Maybe run '%s configure' first\n", applicationName)
-		os.Exit(1)
+		memguard.SafeExit(1)
 	}
 }
