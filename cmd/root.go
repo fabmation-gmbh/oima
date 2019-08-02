@@ -27,14 +27,15 @@ import (
 )
 
 var cfgFile string
-var Config config.Configuration
+var Config = &config.Configuration{}
 var applicationName = os.Args[0]
 
 var rootCmd = &cobra.Command{
 	Use:   "oima <command> [flags]",
-	Short: "oima Manages OCI/ Docker Image Signatures in you 'sigstore'",
+	Short: "OCI/ Docker Image Signature Management Tool",
 	Long: `oima Manages OCI/ Docker Image Signatures in you 'sigstore'.
-Why? Because its impossible to keep track of all Signatures.
+
+Its impossible to keep track of all Signatures.
 
 For Example, you have to remove the Signature for the
 Docker Image 'docker.io/library/hello_world:vulnerable',
@@ -44,11 +45,7 @@ manually delete the Directory/ Signature.
 This Tool automates this Process and helps to keep
 track of all signed Images.`,
 	Version: internal.GetVersion(),
-	Run:     run,
-}
-
-func run(cmd *cobra.Command, args []string) {
-	// TODO
+	//RunE:     run,
 }
 
 func Execute() {
