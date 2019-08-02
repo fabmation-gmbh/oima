@@ -52,7 +52,6 @@ manually delete the Directory/ Signature.
 This Tool automates this Process and helps to keep
 track of all signed Images.`,
 	Version: internal.GetVersion(),
-	//RunE:     run,
 }
 
 func Execute() {
