@@ -3,8 +3,8 @@ package config
 import ()
 
 type RegistryConf struct {
-	RegistryURI	string	`yaml:"uri"`
-	RequireAuth	bool	`yaml:"require_auth"`
-	Username	string	`yaml:"username"`
-	Password	string	`yaml:"password"`
+	RegistryURI	string	`mapstructure:"uri"`
+	RequireAuth	bool	`mapstructure:"require_auth"`
+	Username	string	`mapstructure:"username"`
+	Password	string	`mapstructure:"password"`
 }
