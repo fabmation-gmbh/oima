@@ -1,8 +1,10 @@
-hash: 957a594e6bb7cea8fd403d3d59f7c7982f852e72ee76f48f42fa7419c149c782
-updated: 2019-08-02T13:24:16.545303461+02:00
+hash: ef5df756eb51b433c0fab46b2383da47a8c8bae0262e05d7a83ee8499a7546d9
+updated: 2019-08-02T16:03:46.080060113+02:00
 imports:
 - name: github.com/apsdehal/go-logger
   version: 1abdf898e0242cf7027d832c3e95388315c25de6
+- name: github.com/awnumar/memguard
+  version: e3e7b95f838b7332c78c736aba627517e76b2315
 - name: github.com/fsnotify/fsnotify
   version: 1485a34d5d5723fea214f5710708e19a831720e4
 - name: github.com/google/go-containerregistry
