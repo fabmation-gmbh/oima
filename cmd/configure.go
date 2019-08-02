@@ -87,7 +87,7 @@ func configure() error {
 		Config.Regitry.Password = string(dockerPasswd)
 	}
 
-	err := viper.Unmarshal(Config)
+	err := viper.Unmarshal(&Config)
 	if err != nil {
 		_ = fmt.Errorf("unable to decode into struct, %v", err.Error())
 		return err
