@@ -26,7 +26,6 @@ import (
 
 	"github.com/fabmation-gmbh/oima/internal"
 	"github.com/fabmation-gmbh/oima/pkg/config"
-	"github.com/fabmation-gmbh/oima/pkg/credential"
 )
 
 
@@ -108,5 +107,13 @@ func initConfig() {
 	} else {
 		fmt.Printf("No Config File found! Maybe run '%s configure' first\n", applicationName)
 		memguard.SafeExit(1)
+	}
+
+	if len(Config.Regitry.Password) > 0 {
+		// map User Password into CredStore
+		err = internal.Cred.AddCredential("password", Config.Regitry.Password)
+		if err != nil {
+			Log.Fatal(err.Error())
+		}
 	}
 }
