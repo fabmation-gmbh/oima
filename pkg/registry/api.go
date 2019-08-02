@@ -1,6 +1,8 @@
 // Registry Package adds the Possibility to talk with the (Docker) Registry API
 package registry
 
+import "github.com/awnumar/memguard"
+
 type _Tag string             // _Tag of an Image (for example 'v1.0.0' or '0.1.0-beta'
 type _RegistryVersion string // Describes the current Version of the Registry API
 const (
@@ -11,8 +13,22 @@ const (
 // Registry Authentication Information
 type Auth struct {
 	Required		bool				// Is Authentication Required
+	Cred			Credential			// Needed Credentials
+}
+
+// Holds/ Checks and gets needed Credentials/ Informations
+// to communicate with the Registry API
+type credential interface {
+	Init(cred *Credential)	error		// Checks and "Initializes" the Credential Struct
+	check(cred *Credential)	error		// Check if the Credentials works
+}
+
+// Contains all Informations and Credentials needed to
+// communicate with the Registry API
+type Credential struct {
 	Username		string				// Username
-	Password		string				// Password
+	Password		memguard.Enclave	// Password stored securely
+	BearerToken		memguard.Enclave	// The BearerToken is needed to communicate with the Registry API stored securely
 }
 
 // Holds all Informations that are needed to talk with the Registry API
