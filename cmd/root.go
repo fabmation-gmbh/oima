@@ -63,7 +63,7 @@ track of all signed Images.`,
 			Log.SetLogLevel(logger.DebugLevel)
 		}
 
-		Log.Debugf("Config 'registry': %s", viper.Get("registry"))
+		Config = internal.GetConfig()
 
 		// map Credentials into CredStore
 		if len(Config.Regitry.Password) > 0 {
@@ -72,8 +72,6 @@ track of all signed Images.`,
 			if err != nil {
 				Log.Fatal(err.Error())
 			}
-		} else {
-
 		}
 	},
 }
@@ -108,7 +106,7 @@ func initConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 
-	// unmarshal Config Struct
+	// unmarshal Config struct
 	err := viper.Unmarshal(&Config)
 	if err != nil {
 		_ = fmt.Errorf("unable to decode into struct, %v", err.Error())
