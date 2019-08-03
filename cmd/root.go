@@ -27,6 +27,7 @@ import (
 	"github.com/fabmation-gmbh/oima/internal"
 	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/config"
+	"github.com/fabmation-gmbh/oima/pkg/credential"
 )
 
 
@@ -53,14 +54,31 @@ manually delete the Directory/ Signature.
 This Tool automates this Process and helps to keep
 track of all signed Images.`,
 	Version: internal.GetVersion(),
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// initialize CredStore struct
+		internal.Cred = new(credential.CredStore)
+
+		// set Log Level
+		if debug {
+			Log.SetLogLevel(logger.DebugLevel)
+		}
+
+		Log.Debugf("Config 'registry': %s", viper.Get("registry"))
+
+		// map Credentials into CredStore
+		if len(Config.Regitry.Password) > 0 {
+			// map User Password into CredStore
+			err := internal.Cred.AddCredential("password", Config.Regitry.Password)
+			if err != nil {
+				Log.Fatal(err.Error())
+			}
+		} else {
+
+		}
+	},
 }
 
 func Execute() {
-	// set Log Level
-	if debug {
-		Log.SetLogLevel(logger.DebugLevel)
-	}
-
 	if err := rootCmd.Execute(); err != nil {
 		Log.Error(err.Error())
 		memguard.SafeExit(1)
@@ -76,7 +94,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Print Debug Messages (defaults to false)")
 
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 }
 
 func initConfig() {
@@ -102,13 +119,5 @@ func initConfig() {
 	} else {
 		fmt.Printf("No Config File found! Maybe run '%s configure' first\n", applicationName)
 		memguard.SafeExit(1)
-	}
-
-	if len(Config.Regitry.Password) > 0 {
-		// map User Password into CredStore
-		err = internal.Cred.AddCredential("password", Config.Regitry.Password)
-		if err != nil {
-			Log.Fatal(err.Error())
-		}
 	}
 }
