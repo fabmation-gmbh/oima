@@ -41,6 +41,8 @@ var listCmd = &cobra.Command{
 			Log.Panicf("Error while Initialize DockerRegistry: %s", err.Error())
 		}
 
+		// list Repos
+		dockerRegistry.ListRepositories()
 	},
 }
 
