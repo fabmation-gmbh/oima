@@ -1,12 +1,17 @@
-hash: ef5df756eb51b433c0fab46b2383da47a8c8bae0262e05d7a83ee8499a7546d9
-updated: 2019-08-02T16:03:46.080060113+02:00
+hash: 5960d20ea3383bb773a2c3e2cc2b5aa4fa5b45a840ab98fd82bde0def697def7
+updated: 2019-08-03T19:50:49.946115868+02:00
 imports:
 - name: github.com/apsdehal/go-logger
   version: 1abdf898e0242cf7027d832c3e95388315c25de6
 - name: github.com/awnumar/memguard
   version: e3e7b95f838b7332c78c736aba627517e76b2315
+  subpackages:
+  - core
+  - memcall
 - name: github.com/fsnotify/fsnotify
   version: 1485a34d5d5723fea214f5710708e19a831720e4
+- name: github.com/go-resty/resty
+  version: d467d573085e42a848cb49c1c28ba163b7aa5872
 - name: github.com/google/go-containerregistry
   version: ef12d49c8daf6a6d72978966d5945e39bb898b4a
   subpackages:
@@ -47,13 +52,21 @@ imports:
   version: 24fa6976df40757dce6aea913e7b81ade90530e1
 - name: github.com/spf13/viper
   version: b5bf975e5823809fb22c7644d008757f78a4259e
+- name: gitlab.com/NebulousLabs/fastrand
+  version: 603482d69e405db4890e654c9807b4c772e86c81
 - name: golang.org/x/crypto
   version: de0752318171da717af4ce24d0a2e8626afaeb11
   subpackages:
+  - blake2b
+  - internal/subtle
+  - nacl/secretbox
+  - poly1305
+  - salsa20/salsa
   - ssh/terminal
 - name: golang.org/x/sys
   version: b90733256f2e882e81d52f9126de08df5615afd9
   subpackages:
+  - cpu
   - unix
   - windows
 - name: golang.org/x/text
