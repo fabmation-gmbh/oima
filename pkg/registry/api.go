@@ -27,9 +27,38 @@ const (
 	V2	_RegistryVersion	= "v2"		// (Docker) Registry API Version v1
 )
 
+// Holds all Informations that are needed to talk with the Registry API
+type registry interface {
+	Init()				error			// Initialize Registry (and all required Components (Auth, ...))
+	ListRepositories()  []Repository	// List all Repositories found in the Registry
+	CheckRegistry()		(bool, error)	// Test Authentication, API Version (=> Compatibility)
+	FetchAll()			error			// Fetch _all_ Informations (Repos->Images->Tags) available in the Registry
+}
+
+// Holds/ Checks and gets needed Credentials/ Informations
+// to communicate with the Registry API
+type credential interface {
+	Init(cred *Credential)	error		// Checks and "Initializes" the Credential Struct
+}
+
 type auth interface {
 	Init()
 }
+
+// A (Docker) Repository is (for example) the 'atlassian-jira' in 'docker.reg.local/atlassian-jira:v1.0.0'
+type repository interface {
+	ListImages()		[]Image			// List all available Images
+	FetchAllImages()	error			// Fetch _all_ Image Informations (Images->Tags) available in the Repository
+}
+
+// An Image represents a **single** Docker Image (with _Tag)
+type image interface {
+	ListImageTags() []_Tag 				// List all available Tags of a Image
+	FetchAllTags()	error				// Fetch _all_ Tags from the Image
+}
+
+
+
 
 // Registry Authentication Information
 type Auth struct {
@@ -37,12 +66,6 @@ type Auth struct {
 
 	Required		bool				// Is Authentication Required
 	Cred			Credential			// Needed Credentials
-}
-
-// Holds/ Checks and gets needed Credentials/ Informations
-// to communicate with the Registry API
-type credential interface {
-	Init(cred *Credential)	error		// Checks and "Initializes" the Credential Struct
 }
 
 // The BearerToken is needed to communicate with the Registry API
@@ -65,25 +88,11 @@ type Credential struct {
 }
 
 // Holds all Informations that are needed to talk with the Registry API
-type registry interface {
-	Init()				error			// Initialize Registry (and all required Components (Auth, ...))
-	ListRepositories()  []Repository	// List all Repositories found in the Registry
-	CheckRegistry()		(bool, error)	// Test Authentication, API Version (=> Compatibility)
-	FetchAll()			error			// Fetch _all_ Informations (Repos->Images->Tags) available in the Registry
-}
-
-// Holds all Informations that are needed to talk with the Registry API
 // Implements the @registry Interface
 type DockerRegistry struct {
 	Version			_RegistryVersion	// API Version
 	URI				string				// Registry URI
 	Authentication	Auth				// Authentication Informations and Credentials
-}
-
-// A (Docker) Repository is (for example) the 'atlassian-jira' in 'docker.reg.local/atlassian-jira:v1.0.0'
-type repository interface {
-	ListImages()		[]Image			// List all available Images
-	FetchAllImages()	error			// Fetch _all_ Image Informations (Images->Tags) available in the Repository
 }
 
 // A (Docker) Repository is (for example) the 'atlassian-jira' in 'docker.reg.local/atlassian-jira:v1.0.0'
@@ -94,12 +103,6 @@ type Repository struct {
 
 	Name			string				// Name of the Repository (eg. 'atlassian-jira' or 'testing/unstable')
 	Images			[]Image				// All
-}
-
-// An Image represents a **single** Docker Image (with _Tag)
-type image interface {
-	ListImageTags() []_Tag 				// List all available Tags of a Image
-	FetchAllTags()	error				// Fetch _all_ Tags from the Image
 }
 
 // An Image represents a **single** Docker Image (with all Tags)
