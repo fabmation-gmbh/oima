@@ -200,6 +200,7 @@ func (r *DockerRegistry) ListRepositories() []Repository {
 	}
 
 	// TODO: Move me to FetchAll()
+	var doBreak bool
 	for _, val := range catalog {
 		if strings.Contains(val, "/") {
 			repoName := strings.Split(val, "/")
@@ -219,6 +220,11 @@ func (r *DockerRegistry) ListRepositories() []Repository {
 				Name:           name,
 				Images:         nil,
 			}
+
+			// check if a Repo already exists with that Name
+			for _, repoV := range r.Repos { if repoV.Name == name { doBreak = true; break } }
+			if doBreak { doBreak = false; break }
+
 			r.Repos = append(r.Repos, repo)
 			Log.Debugf("-- New Repo Entry: %s", repo.Name)
 		}
@@ -291,7 +297,14 @@ func (r *Repository) FetchAllImages() error {
 
 	for _, v := range catalog {
 		// check if Entry is an Image or an Repo
-		if strings.HasSuffix(v, "/") {
+		if strings.Contains(v, r.Name) && !strings.HasSuffix(v, "/") {
+			//slashCountRepo := countSpecChart(r.Name, 47)
+			//slashCountImage := countSpecChart(v, 47)
+
+			//Log.Debugf("%d || %d", slashCountRepo, (slashCountImage + 1))
+
+			//if slashCountRepo != (slashCountImage + 1) { continue } // continue, because Entry is an Sub-Repo and not an Image
+
 			newImage := Image{
 				Repository: r,
 				Name:       v,
@@ -396,7 +409,7 @@ func (i *Image) FetchAllTags() error {
 
 func (a *Auth) Init() { a.Cred.auth = a }
 
-//noinspection GoNilness
+//noinspection GoNilnesss
 func (c *Credential) Init()	error {
 	var password *memguard.LockedBuffer
 
@@ -498,4 +511,10 @@ func getRegistryVersion(c *Credential) (_RegistryVersion, error) {
 	}
 
 	return version, nil
+}
+
+func countSpecChart(s string, c int) int {
+	var num int = 0
+	for _, v := range s { if int(v) == c { num++ } }
+	return num
 }

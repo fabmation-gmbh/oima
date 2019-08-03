@@ -44,6 +44,13 @@ var listCmd = &cobra.Command{
 		// list Repos
 		_ = dockerRegistry.ListRepositories()
 		_ = dockerRegistry.FetchAll()
+
+		for _, v := range dockerRegistry.ListRepositories() {
+			x, _ := v.ListImages()
+			for _, rV := range x {
+				rV.FetchAllTags()
+			}
+		}
 	},
 }
 
