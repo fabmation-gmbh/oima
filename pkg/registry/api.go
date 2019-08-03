@@ -197,6 +197,7 @@ func (r *DockerRegistry) ListRepositories() []Repository {
 		memguard.SafeExit(1)
 	}
 
+	// TODO: Move me to FetchAll()
 	for _, val := range catalog {
 		if strings.Contains(val, "/") {
 			repoName := strings.Split(val, "/")
