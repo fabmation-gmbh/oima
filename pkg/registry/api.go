@@ -126,18 +126,17 @@ func (r *DockerRegistry) Init() error {
 
 	// set parent Pointer back to this struct
 	r.Authentication.dockerRegistry = r
-	if b, _ := strconv.ParseBool(conf.Regitry.RequireAuth); b {
-		r.Authentication.Required = true
-	} else {
-		r.Authentication.Required = false
-	}
+
+	// Initialize Auth Struct
+	b, _ := strconv.ParseBool(conf.Regitry.RequireAuth)
+	r.Authentication.Required = b
+
 	r.Authentication.Init()
 
 	err := r.Authentication.Cred.Init()
 	if err != nil {
 		Log.PanicF("Could not Initialize Credentials: %s", err.Error())
 	}
-
 	return nil
 }
 
