@@ -230,7 +230,143 @@ func (r *DockerRegistry) ListRepositories() []Repository {
 }
 	}
 
-	return r.Repos
+	// fetch all Images (and Image Tags)
+	//for _, v := range r.Images { // TODO: implement me }
+
+	return r.Images, nil
+}
+
+func (r *Repository) FetchAllImages() error {
+	if len(r.Name) == 0 {
+		Log.Fatal("[Internal Error] Trying to fetch all Images in a Repo which Name is not set!!")
+		return errors.NewRepositoryNameNotDefinedError()
+	}
+
+	var authData = authInfo{
+		token:   nil,
+		authReq: r.DockerRegistry.Authentication.Required,
+	}
+
+	if r.DockerRegistry.Authentication.Required {
+		token, err := r.DockerRegistry.Authentication.Cred.Token.BearerToken.Open()
+		if err != nil {
+			memguard.SafePanic(err)
+		}
+		defer token.Destroy()
+
+		authData.token = token
+	}
+
+	// get Registry Catalog
+	catalog, err := getRegistryCatalog(&authData, r.DockerRegistry.URI, r.DockerRegistry.Version)
+	if err != nil {
+		Log.Fatalf("Error while fetching Registry Catalog: %s", err.Error())
+		memguard.SafeExit(1)
+	}
+
+	for _, v := range catalog {
+		// check if Entry is an Image or an Repo
+		if strings.HasSuffix(v, "/") {
+			newImage := Image{
+				Repository: r,
+				Name:       v,
+				Tags:       nil,
+			}
+
+			// fetch Image Tags
+			err := newImage.FetchAllTags()
+			if err != nil {
+				Log.Fatalf("Error while Fetching Tags of Image '%s': %s", newImage.Name, err.Error())
+				memguard.SafeExit(1)
+			}
+
+			r.Images = append(r.Images, newImage)
+			Log.Debugf("--> Add new Image: %s", newImage.Name)
+		}
+	}
+
+	return nil
+}
+
+//noinspection ALL
+func (i *Image) FetchAllTags() error {
+	// check Image Name
+	if len(i.Name) == 0 {
+		Log.Fatal("[Internal Error] Trying to fetch all Tags of an Image which Name is not set!!")
+		return errors.NewImageNameNotDefinedError()
+	}
+
+	var uri = fmt.Sprintf("%s/%s/%s/tags/list",
+			i.Repository.DockerRegistry.URI,
+			i.Repository.DockerRegistry.Version,
+			i.Name)
+	var authData = authInfo{
+		token:   nil,
+		authReq: i.Repository.DockerRegistry.Authentication.Required,
+	}
+
+	client := resty.New()
+	client.SetHeaders(map[string]string{
+		"Docker-Distribution-Api-Version": "registry/2.0",
+		"User-Agent":                      "oima-cli",
+	})
+
+	if i.Repository.DockerRegistry.Authentication.Required {
+		token, err := i.Repository.DockerRegistry.Authentication.Cred.Token.BearerToken.Open()
+		if err != nil {
+			memguard.SafePanic(err)
+		}
+		defer token.Destroy()
+
+		client.SetHeader("Authorization", fmt.Sprintf("Bearer %s", token.String()))
+		authData.token = token
+	}
+
+	resp, err := client.R().Get(uri)
+	if err != nil {
+		Log.Criticalf("Error while getting Auth. Token: %s", err.Error())
+		memguard.SafeExit(1)
+	}
+
+	type _tags struct {
+		tags	[]string		// Array of all Tags of an Image
+	}
+
+	var tags = _tags{}
+
+	err = json.Unmarshal(resp.Body(), &tags)
+	if err != nil {
+		Log.Debugf("Response: %s", resp.Body())
+		Log.Fatalf("Error while marshaling Response: %s", err.Error())
+		memguard.SafeExit(1)
+	}
+
+	var imageData = imageInfo{
+		name: i.Name,
+		tag:  nil,
+	}
+
+	newTag := Tag{
+		TagName:       v,
+		ContentDigest: nil,
+	}
+	for _, v := range tags {
+		imageData.tag = v
+
+		// get Image-Tag Digest
+		newTag.ContentDigest, err = getTagDigest(&authData, imageData,
+				i.Repository.DockerRegistry.URI, i.Repository.DockerRegistry.Version)
+		if err != nil {
+			Log.Fatalf("Error while getting Image-Tag Digest: %s", err.Error())
+			return err
+		}
+
+		// add Tag to the other Tags
+		i.Tags = append(i.Tags, newTag)
+		Log.Debugf("Digest (%s:%s): %s", i.Name, imageData.tag, newTag.ContentDigest)
+	}
+
+	return nil
 }
 
 func (a *Auth) Init() { a.Cred.auth = a }
