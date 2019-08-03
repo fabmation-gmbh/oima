@@ -5,15 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/awnumar/memguard"
-	"io/ioutil"
-	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/fabmation-gmbh/oima/pkg/config"
+	"github.com/go-resty/resty"
+
 	"github.com/fabmation-gmbh/oima/internal"
 	. "github.com/fabmation-gmbh/oima/internal/log"
-	_http "github.com/fabmation-gmbh/oima/pkg/http"
+	"github.com/fabmation-gmbh/oima/pkg/config"
 )
 
 var conf config.Configuration
@@ -22,6 +21,8 @@ var conf config.Configuration
 type _Tag string             // _Tag of an Image (for example 'v1.0.0' or '0.1.0-beta'
 type _RegistryVersion string // Describes the current Version of the Registry API
 const (
+	VUNK _RegistryVersion	= "UNKNOWN"	// Unknown Registry API Version
+
 	V1	_RegistryVersion	= "v1"		// (Docker) Registry API Version v1
 	V2	_RegistryVersion	= "v2"		// (Docker) Registry API Version v1
 )
@@ -117,6 +118,8 @@ type Tag struct {
 
 
 /// >>>>>>>>>> Functions <<<<<<<<<< ///
+
+//noinspection GoNilness
 func (r *DockerRegistry) Init() error {
 	conf = internal.GetConfig()
 
@@ -160,32 +163,40 @@ func (c *Credential) Init()	error {
 	}
 	defer password.Destroy()
 
+	// get Registry Version
+	c.auth.dockerRegistry.Version, err = getRegistryVersion(c)
+	if err != nil {
+		Log.Errorf("Error while getting Registry API Version: %s", err.Error())
+		memguard.SafeExit(1)
+	}
+
+	if c.auth.dockerRegistry.Version == V1 {
+		Log.Errorf("Registry API Version is v1. Version 1 isn't supported yet!")
+		memguard.SafeExit(1)
+	}
+
 	// get Bearer Token
-	httpClient := _http.NewClient()
-	req, err := http.NewRequest(http.MethodGet, uri, nil)
+	client := resty.New()
+	client.SetHeader("User-Agent", "oima-cli")
+
+	if c.auth.Required {
+		var password *memguard.LockedBuffer
+
+		// get Password
+		password, err := c.Password.Open()
+		if err != nil { memguard.SafePanic(err) }
+		defer password.Destroy()
+
+		client.SetBasicAuth(c.Username, password.String())
+	}
+
+	req, err := client.R().Get(fmt.Sprintf(uri))
 	if err != nil {
-		Log.Fatal(err.Error())
+		Log.Criticalf("Error while getting Auth. Token: %s", err.Error())
 		memguard.SafeExit(1)
 	}
 
-	// set Request Parameters
-	req.Header.Set("User-Agent", "oima-client")
-	if b, _ := strconv.ParseBool(conf.Regitry.RequireAuth); b {
-		req.SetBasicAuth(conf.Regitry.Username, password.String())
-	}
-
-	response, err := httpClient.Do(req)
-	if err != nil {
-		Log.Fatalf("Error while making Request: %s", err.Error())
-		memguard.SafeExit(1)
-	}
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		Log.Fatalf("Error while Reading Response: %s", err.Error())
-		memguard.SafeExit(1)
-	}
-
-	err = json.Unmarshal(body, &c.Token)
+	err = json.Unmarshal(req.Body(), &c.Token)
 	if err != nil {
 		Log.Fatalf("Error while marshaling Response: %s", err.Error())
 		memguard.SafeExit(1)
@@ -197,4 +208,36 @@ func (c *Credential) Init()	error {
 	Log.Debugf("Bearer Token Expires On %d (%s)", c.Token.ExpiresOn, time.Unix(c.Token.ExpiresOn, 0))
 
 	return nil
+}
+
+/// ------------- Internal Functions
+
+//noinspection GoNilness
+func getRegistryVersion(c *Credential) (_RegistryVersion, error) {
+	var version _RegistryVersion
+	client := resty.New()
+
+	client.SetHeader("User-Agent", "oima-cli")
+
+	if c.auth.Required {
+		var password *memguard.LockedBuffer
+
+		// get Password
+		password, err := c.Password.Open()
+		if err != nil { memguard.SafePanic(err) }
+		defer password.Destroy()
+
+		client.SetBasicAuth(c.Username, password.String())
+	}
+
+	resp, err := client.R().Get(fmt.Sprintf("%s/v2/", c.auth.dockerRegistry.URI))
+	if err != nil { return VUNK, err }
+
+	if resp.StatusCode() == 404 {
+		version = V1
+	} else {
+		version = V2
+	}
+
+	return version, nil
 }
