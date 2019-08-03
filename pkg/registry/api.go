@@ -10,12 +10,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/fabmation-gmbh/oima/pkg/config"
 	"github.com/fabmation-gmbh/oima/internal"
 	. "github.com/fabmation-gmbh/oima/internal/log"
 	_http "github.com/fabmation-gmbh/oima/pkg/http"
 )
 
-var conf = internal.GetConfig()
+var conf config.Configuration
 
 
 type _Tag string             // _Tag of an Image (for example 'v1.0.0' or '0.1.0-beta'
@@ -117,7 +118,13 @@ type Tag struct {
 
 /// >>>>>>>>>> Functions <<<<<<<<<< ///
 func (r *DockerRegistry) Init() error {
-	// Initialize Auth Struct
+	conf = internal.GetConfig()
+
+	// set Flags
+	r.URI = conf.Regitry.RegistryURI
+	Log.Debugf("Set DockerRegistry URI: %s", r.URI)
+
+	// set parent Pointer back to this struct
 	r.Authentication.dockerRegistry = r
 	if b, _ := strconv.ParseBool(conf.Regitry.RequireAuth); b {
 		r.Authentication.Required = true
