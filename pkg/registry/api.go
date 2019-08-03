@@ -228,9 +228,15 @@ func (r *DockerRegistry) ListRepositories() []Repository {
 }
 
 func (r *DockerRegistry) FetchAll() error {
-	//for _, v := range r.Repos {
-	//	// TODO: Implement me
-	//}
+	for _, v := range r.Repos {
+		Log.Debugf("Fetching Images for Repo '%s'", v.Name)
+
+		err := v.FetchAllImages()
+		if err != nil {
+			Log.Fatalf("Error while Fetching all Images: %s", err.Error())
+			return err
+		}
+	}
 
 	return nil
 }
