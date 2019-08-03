@@ -42,7 +42,7 @@ var listCmd = &cobra.Command{
 		}
 
 		// list Repos
-		dockerRegistry.ListRepositories()
+		_ = dockerRegistry.ListRepositories()
 	},
 }
 
