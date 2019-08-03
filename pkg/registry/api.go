@@ -223,7 +223,7 @@ func (c *Credential) Init()	error {
 
 		var uri = fmt.Sprintf("%s/api/docker/docker/%s/token",
 			c.auth.dockerRegistry.URI, c.auth.dockerRegistry.Version)
-		resp, err := client.R().Get(fmt.Sprintf(uri))
+		resp, err := client.R().Get(uri)
 		if err != nil {
 			Log.Criticalf("Error while getting Auth. Token: %s", err.Error())
 			memguard.SafeExit(1)
