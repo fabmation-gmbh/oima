@@ -147,7 +147,6 @@ func (a *Auth) Init() { a.Cred.auth = a }
 
 //noinspection GoNilness
 func (c *Credential) Init()	error {
-	var uri = fmt.Sprintf("%s/api/docker/docker/v2/token", c.auth.dockerRegistry.URI)
 	var password *memguard.LockedBuffer
 
 	// get Password
@@ -175,11 +174,14 @@ func (c *Credential) Init()	error {
 		memguard.SafeExit(1)
 	}
 
-	// get Bearer Token
-	client := resty.New()
-	client.SetHeader("User-Agent", "oima-cli")
-
 	if c.auth.Required {
+		// get Bearer Token
+		client := resty.New()
+		client.SetHeaders(map[string]string{
+			"Docker-Distribution-Api-Version": "registry/2.0",
+			"User-Agent": "oima-cli",
+		})
+
 		var password *memguard.LockedBuffer
 
 		// get Password
@@ -188,24 +190,29 @@ func (c *Credential) Init()	error {
 		defer password.Destroy()
 
 		client.SetBasicAuth(c.Username, password.String())
-	}
 
-	req, err := client.R().Get(fmt.Sprintf(uri))
-	if err != nil {
-		Log.Criticalf("Error while getting Auth. Token: %s", err.Error())
-		memguard.SafeExit(1)
-	}
+		var uri = fmt.Sprintf("%s/api/docker/docker/%s/token",
+			c.auth.dockerRegistry.URI, c.auth.dockerRegistry.Version)
+		resp, err := client.R().Get(fmt.Sprintf(uri))
+		if err != nil {
+			Log.Criticalf("Error while getting Auth. Token: %s", err.Error())
+			memguard.SafeExit(1)
+		}
 
-	err = json.Unmarshal(req.Body(), &c.Token)
-	if err != nil {
-		Log.Fatalf("Error while marshaling Response: %s", err.Error())
-		memguard.SafeExit(1)
-	}
+		err = json.Unmarshal(resp.Body(), &c.Token)
+		if err != nil {
+			Log.Debugf("Response: %s", resp.Body())
+			Log.Fatalf("Error while marshaling Response: %s", err.Error())
+			memguard.SafeExit(1)
+		}
 
-	// convert Seconds in BearerToken.ExpiresOn into Unix Timestamp
-	c.Token.ExpiresOn = time.Now().Unix() + c.Token.ExpiresOn
-	Log.Debugf("Bearer Token: '%s'", c.Token.BearerToken)
-	Log.Debugf("Bearer Token Expires On %d (%s)", c.Token.ExpiresOn, time.Unix(c.Token.ExpiresOn, 0))
+		Log.Debugf("Response: %s", c.Token)
+
+		// convert Seconds in BearerToken.ExpiresOn into Unix Timestamp
+		c.Token.ExpiresOn = time.Now().Unix() + c.Token.ExpiresOn
+		Log.Debugf("Bearer Token: '%s'", c.Token.BearerToken)
+		Log.Debugf("Bearer Token Expires On %d (%s)", c.Token.ExpiresOn, time.Unix(c.Token.ExpiresOn, 0))
+	} else { Log.Notice("Authentication not required, so no need to get a Bearer Token") }
 
 	return nil
 }
