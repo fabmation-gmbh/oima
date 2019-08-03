@@ -14,6 +14,7 @@ import (
 	"github.com/fabmation-gmbh/oima/internal"
 	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/config"
+	"github.com/fabmation-gmbh/oima/pkg/errors"
 )
 
 var conf config.Configuration
@@ -173,67 +174,44 @@ func (r *DockerRegistry) Init() error {
 
 //noinspection GoNilness
 func (r *DockerRegistry) ListRepositories() []Repository {
-	var uri = fmt.Sprintf("%s/%s/_catalog", r.URI, r.Version)
-	password, err := r.Authentication.Cred.Password.Open()
+	// TODO: check if r.Authentication.Cred.Token is expired
+
+	token, err := r.Authentication.Cred.Token.BearerToken.Open()
 	if err != nil {
 		memguard.SafePanic(err)
 	}
-	defer password.Destroy()
+	defer token.Destroy()
 
-	client := resty.New()
-	client.SetHeaders(map[string]string{
-		"Docker-Distribution-Api-Version": "registry/2.0",
-		"User-Agent": "oima-cli",
-	})
-
-	if r.Authentication.Required { client.SetHeader("Authorization", fmt.Sprintf("JWT %s", password.String())) }
-
-	resp, err := client.R().Get(fmt.Sprintf(uri))
+	// get Registry Catalog
+	catalog, err := getRegistryCatalog(token, r.Authentication.Required, r.URI, r.Version)
 	if err != nil {
-		Log.Criticalf("Error while getting Auth. Token: %s", err.Error())
+		Log.Fatalf("Error while fetching Registry Catalog: %s", err.Error())
 		memguard.SafeExit(1)
 	}
 
-	type response struct {
-		RepoNames	[]string		`json:"repositories"`
-	}
-
-	var result response
-	var _repos []string
-
-	err = json.Unmarshal(resp.Body(), &result)
-	if err != nil {
-		Log.Debugf("Response: %s", resp.Body())
-		Log.Fatalf("Error while marshaling Response: %s", err.Error())
-		memguard.SafeExit(1)
-	}
-
-	Log.Debugf("%s", result.RepoNames)
-
-	for _, val := range result.RepoNames {
+	for _, val := range catalog {
 		if strings.Contains(val, "/") {
-			repoNames := strings.Split(val, "/")
-			lenRepos := len(repoNames)
-			var repo string
-			for i, v := range repoNames {
+			repoName := strings.Split(val, "/")
+			lenRepos := len(repoName)
+			var name string
+			for i, v := range repoName {
 				if i == (lenRepos - 1) { break }
-				repo += fmt.Sprintf("%s/", v)
+				name += fmt.Sprintf("%s/", v)
 			}
 
-			_repos = append(_repos, repo)
+			repo := Repository{
+				DockerRegistry: r,
+				Name:           name,
+				Images:         nil,
+			}
+			r.Repos = append(r.Repos, repo)
 		}
 	}
 
 	// TODO: Move me to FetchAll()
-	for _, val := range _repos {
-		repo := Repository{
-			DockerRegistry: r,
-			Name:           val,
-			Images:         nil,
-		}
 
-		// append Repos to Repo List of Registry
-		r.Repos = append(r.Repos, repo)
+	return r.Repos
+}
 	}
 
 	return r.Repos
