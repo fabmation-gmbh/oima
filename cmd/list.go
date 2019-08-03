@@ -23,6 +23,9 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+
+	. "github.com/fabmation-gmbh/oima/internal/log"
+	registry "github.com/fabmation-gmbh/oima/pkg/registry"
 )
 
 // listCmd represents the list command
@@ -31,6 +34,12 @@ var listCmd = &cobra.Command{
 	Short: "List all Images of the Remote Registry",
 
 	Run: func(cmd *cobra.Command, args []string) {
+		// ATTENTION: This is only for testing/ debugging!
+		var dockerRegistry registry.DockerRegistry
+		err := dockerRegistry.Init()
+		if err != nil {
+			Log.Panicf("Error while Initialize DockerRegistry: %s", err.Error())
+		}
 
 	},
 }
