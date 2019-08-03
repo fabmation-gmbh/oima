@@ -56,8 +56,8 @@ type auth interface {
 
 // A (Docker) Repository is (for example) the 'atlassian-jira' in 'docker.reg.local/atlassian-jira:v1.0.0'
 type repository interface {
-	ListImages()		[]Image			// List all available Images
-	FetchAllImages()	error			// Fetch _all_ Image Informations (Images->Tags) available in the Repository
+	ListImages()		([]Image, error)	// List all available Images
+	FetchAllImages()	error				// Fetch _all_ Image Informations (Images->Tags) available in the Repository
 }
 
 // An Image represents a **single** Docker Image (with _Tag)
@@ -175,15 +175,23 @@ func (r *DockerRegistry) Init() error {
 //noinspection GoNilness
 func (r *DockerRegistry) ListRepositories() []Repository {
 	// TODO: check if r.Authentication.Cred.Token is expired
-
-	token, err := r.Authentication.Cred.Token.BearerToken.Open()
-	if err != nil {
-		memguard.SafePanic(err)
+	authData := authInfo{
+		token:   nil,
+		authReq: r.Authentication.Required,
 	}
-	defer token.Destroy()
+
+	if r.Authentication.Required {
+		token, err := r.Authentication.Cred.Token.BearerToken.Open()
+		if err != nil {
+			memguard.SafePanic(err)
+		}
+		defer token.Destroy()
+
+		authData.token = token
+	}
 
 	// get Registry Catalog
-	catalog, err := getRegistryCatalog(token, r.Authentication.Required, r.URI, r.Version)
+	catalog, err := getRegistryCatalog(&authData, r.URI, r.Version)
 	if err != nil {
 		Log.Fatalf("Error while fetching Registry Catalog: %s", err.Error())
 		memguard.SafeExit(1)
@@ -196,7 +204,11 @@ func (r *DockerRegistry) ListRepositories() []Repository {
 			var name string
 			for i, v := range repoName {
 				if i == (lenRepos - 1) { break }
-				name += fmt.Sprintf("%s/", v)
+
+				// prevent adding a Slash to the last Repo Entry Name
+				if i != (lenRepos -2 ) {
+					name += fmt.Sprintf("%s/", v)
+				} else { name += v }
 			}
 
 			repo := Repository{
@@ -205,6 +217,7 @@ func (r *DockerRegistry) ListRepositories() []Repository {
 				Images:         nil,
 			}
 			r.Repos = append(r.Repos, repo)
+			Log.Debugf("-- New Repo Entry: %s", repo.Name)
 		}
 	}
 

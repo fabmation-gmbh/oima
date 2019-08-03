@@ -9,9 +9,13 @@ import (
 	. "github.com/fabmation-gmbh/oima/internal/log"
 )
 
+type authInfo struct {
+	token	*memguard.LockedBuffer
+	authReq	bool
+}
+
 func getRegistryCatalog(
-	token *memguard.LockedBuffer,
-	authRequired bool,
+	auth *authInfo,
 	regURI string,
 	version _RegistryVersion) ([]string, error) {
 
@@ -23,8 +27,8 @@ func getRegistryCatalog(
 		"User-Agent":                      "oima-cli",
 	})
 
-	if authRequired {
-		client.SetHeader("Authorization", fmt.Sprintf("JWT %s", token.String()))
+	if auth.authReq {
+		client.SetHeader("Authorization", fmt.Sprintf("JWT %s", auth.token.String()))
 	}
 
 	resp, err := client.R().Get(fmt.Sprintf(uri))
