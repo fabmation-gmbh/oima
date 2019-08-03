@@ -93,6 +93,7 @@ type DockerRegistry struct {
 	Version			_RegistryVersion	// API Version
 	URI				string				// Registry URI
 	Authentication	Auth				// Authentication Informations and Credentials
+	Repos			[]Repository		// List of all Repos in the Registry
 }
 
 // A (Docker) Repository is (for example) the 'atlassian-jira' in 'docker.reg.local/atlassian-jira:v1.0.0'
@@ -101,6 +102,24 @@ type DockerRegistry struct {
 type Repository struct {
 	DockerRegistry	*DockerRegistry		// Pointer to Parent Struct
 
+	// List of Sub-Repositories in the Repository
+	// A Repo can contain unlimited Sub-Repos (and Sub-Sub-Repos, Sub-Sub-Sub-Repos, ...)
+	// For Example:
+	// docker.io
+	// |-- nginx						// nginx Image
+	// |   `-- v1.0.0						// Image Version v1.0.0
+	// `-- unstable/			// unstable Repo
+	//     |-- samba					// samba Image
+	//     |   |-- v1.0.0					// Image Version v1.0.0
+	//     |   `-- v1.1.0					// Image Version v1.1.0
+	//     `-- testing/			// testing Sub-Repo
+	//         |-- jira					// jira Image
+	//         |   |-- v1.0.0				// Image Version v1.0.0
+	//         |   `-- v1.1.0				// Image Version v1.1.0
+	//         `-- wiki					// wiki Image
+	//             |-- v1.0.0				// Image Version v1.0.0
+	//             `-- v2.0.0				// Image Version v2.0.0
+	SubRepo			[]Repository
 	Name			string				// Name of the Repository (eg. 'atlassian-jira' or 'testing/unstable')
 	Images			[]Image				// All
 }
