@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 
 	. "github.com/fabmation-gmbh/oima/internal/log"
-	registry "github.com/fabmation-gmbh/oima/pkg/registry"
+	"github.com/fabmation-gmbh/oima/pkg/registry"
 )
 
 // listCmd represents the list command

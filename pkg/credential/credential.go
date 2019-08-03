@@ -40,6 +40,11 @@ func (cred *CredStore) AddCredential(name string, data []byte) error {
 }
 
 func (cred *CredStore) GetCredential(name string) (*memguard.Enclave, error) {
+	// check if credentials is Initialized
+	if cred.credentials == nil {
+		cred.credentials = make(map[string]*memguard.Enclave)
+	}
+
 	// check if Credential exists in CredStore
 	if _, err := cred.credentials[name]; !err {
 		return nil, errors.NewCredentialNotExistsError()
