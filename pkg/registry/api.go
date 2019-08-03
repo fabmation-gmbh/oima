@@ -134,6 +134,8 @@ type Repository struct {
 // An Image represents a **single** Docker Image (with all Tags)
 // Implements the @image Interface
 type Image struct {
+	Repository		*Repository			// Pointer to Parent Struct
+
 	Name			string  			// Image Name (eg. 'nginx')
 	Tags			[]Tag  				// List of all available Tags
 }
