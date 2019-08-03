@@ -2,6 +2,7 @@ package credential
 
 import (
 	"github.com/awnumar/memguard"
+	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/errors"
 )
 
@@ -35,11 +36,14 @@ func (cred *CredStore) AddCredential(name string, data []byte) error {
 		memguard.SafePanic(errors.NewEnclaveEmptyError())
 	}
 
+	Log.Debugf("Add Credential with Key Name '%s'", name)
 	cred.credentials[name] = encryptedData
 	return nil
 }
 
 func (cred *CredStore) GetCredential(name string) (*memguard.Enclave, error) {
+	Log.Debugf("Length of credentials struct: %d", len(cred.credentials))
+
 	// check if credentials is Initialized
 	if cred.credentials == nil {
 		cred.credentials = make(map[string]*memguard.Enclave)
