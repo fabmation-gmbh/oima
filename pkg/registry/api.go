@@ -138,7 +138,7 @@ func (a *Auth) Init() { a.Cred.auth = a }
 
 //noinspection GoNilness
 func (c *Credential) Init()	error {
-	var uri string = fmt.Sprintf("%s/api/docker/docker/v2/token", c.auth.dockerRegistry.URI)
+	var uri = fmt.Sprintf("%s/api/docker/docker/v2/token", c.auth.dockerRegistry.URI)
 	var password *memguard.LockedBuffer
 
 	// get Password
