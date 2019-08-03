@@ -8,6 +8,7 @@ import (
 	"github.com/fabmation-gmbh/oima/pkg/config"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/fabmation-gmbh/oima/internal"
@@ -119,7 +120,7 @@ type Tag struct {
 func (r *DockerRegistry) Init() error {
 	// Initialize Auth Struct
 	r.Authentication.dockerRegistry = r
-	if conf.Regitry.RequireAuth {
+	if b, _ := strconv.ParseBool(conf.Regitry.RequireAuth); b {
 		r.Authentication.Required = true
 	} else {
 		r.Authentication.Required = false
@@ -164,7 +165,7 @@ func (c *Credential) Init()	error {
 
 	// set Request Parameters
 	req.Header.Set("User-Agent", "oima-client")
-	if conf.Regitry.RequireAuth {
+	if b, _ := strconv.ParseBool(conf.Regitry.RequireAuth); b {
 		req.SetBasicAuth(conf.Regitry.Username, password.String())
 	}
 

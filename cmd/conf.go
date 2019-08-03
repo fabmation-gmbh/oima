@@ -26,6 +26,7 @@ import (
 	"github.com/fabmation-gmbh/oima/pkg/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"strconv"
 )
 
 // confCmd represents the conf command
@@ -43,7 +44,7 @@ var confCmd = &cobra.Command{
 		// print Values
 		fmt.Printf("Registry URI: %s\n", conf.Regitry.RegistryURI)
 
-		if conf.Regitry.RequireAuth {
+		if b, _ := strconv.ParseBool(conf.Regitry.RequireAuth); b {
 			fmt.Printf("Authentication is required\n")
 		} else {
 			fmt.Printf("Authentication is not required\n")
