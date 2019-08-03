@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"crypto/x509/pkix"
 	"encoding/json"
 	"fmt"
 	"github.com/awnumar/memguard"
@@ -14,6 +15,13 @@ type authInfo struct {
 	authReq	bool
 }
 
+type imageInfo struct {
+	name	string			// Image Name
+	tag		string			// Tag Name
+}
+
+
+//noinspection GoNilness
 func getRegistryCatalog(
 	auth *authInfo,
 	regURI string,
@@ -28,13 +36,13 @@ func getRegistryCatalog(
 	})
 
 	if auth.authReq {
-		client.SetHeader("Authorization", fmt.Sprintf("JWT %s", auth.token.String()))
+		client.SetHeader("Authorization", fmt.Sprintf("Bearer %s", auth.token.String()))
 	}
 
 	resp, err := client.R().Get(fmt.Sprintf(uri))
 	if err != nil {
 		Log.Criticalf("Error while getting Auth. Token: %s", err.Error())
-		memguard.SafeExit(1)
+		return nil, err
 	}
 
 	type response struct {
@@ -56,4 +64,27 @@ func getRegistryCatalog(
 	}
 
 	return entries, nil
+}
+
+func getTagDigest(auth *authInfo, image imageInfo, regURI string, version _RegistryVersion) (string, error) {
+	var uri = fmt.Sprintf("%s/%s/%s/manifests/%s", regURI, version, image.name, image.tag)
+
+	client := resty.New()
+	client.SetHeaders(map[string]string{
+		"Accept": "application/vnd.docker.distribution.manifest.v2+json",
+		"Docker-Distribution-Api-Version": "registry/2.0",
+		"User-Agent":                      "oima-cli",
+	})
+
+	if auth.authReq {
+		client.SetHeader("Authorization", fmt.Sprintf("Bearer %s", auth.token.String()))
+	}
+
+	resp, err := client.R().Get(fmt.Sprintf(uri))
+	if err != nil {
+		Log.Criticalf("Error while getting Auth. Token: %s", err.Error())
+		return nil, err
+	}
+
+	return resp.Header().Get("Docker-Content-Digest"), nil
 }
