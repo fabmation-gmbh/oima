@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/awnumar/memguard"
-	"github.com/fabmation-gmbh/oima/pkg/config"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -16,7 +15,7 @@ import (
 	_http "github.com/fabmation-gmbh/oima/pkg/http"
 )
 
-var conf config.Configuration = internal.GetConfig()
+var conf = internal.GetConfig()
 
 
 type _Tag string             // _Tag of an Image (for example 'v1.0.0' or '0.1.0-beta'
