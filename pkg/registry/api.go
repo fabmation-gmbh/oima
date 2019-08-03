@@ -224,14 +224,33 @@ func (r *DockerRegistry) ListRepositories() []Repository {
 		}
 	}
 
-	// TODO: Move me to FetchAll()
-
 	return r.Repos
 }
+
+func (r *DockerRegistry) FetchAll() error {
+	//for _, v := range r.Repos {
+	//	// TODO: Implement me
+	//}
+
+	return nil
+}
+
+
+func (r *Repository) ListImages() ([]Image, error) {
+	if len(r.Name) == 0 {
+		Log.Fatal("[Internal Error] Trying to List Images about a Repo which Name is not set!!")
+		return nil, errors.NewRepositoryNameNotDefinedError()
 	}
 
 	// fetch all Images (and Image Tags)
-	//for _, v := range r.Images { // TODO: implement me }
+	for _, v := range r.Images {
+		// fetch Tags
+		err := v.FetchAllTags()
+		if err != nil {
+			Log.Fatalf("Error while Fetching Image Tags: %s", err.Error())
+			return nil, err
+		}
+	}
 
 	return r.Images, nil
 }
@@ -343,14 +362,14 @@ func (i *Image) FetchAllTags() error {
 
 	var imageData = imageInfo{
 		name: i.Name,
-		tag:  nil,
+		tag:  "",
 	}
 
 	newTag := Tag{
-		TagName:       v,
-		ContentDigest: nil,
+		TagName:       "",
+		ContentDigest: "",
 	}
-	for _, v := range tags {
+	for _, v := range tags.tags {
 		imageData.tag = v
 
 		// get Image-Tag Digest

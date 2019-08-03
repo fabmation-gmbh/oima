@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"crypto/x509/pkix"
 	"encoding/json"
 	"fmt"
 	"github.com/awnumar/memguard"
@@ -83,7 +82,7 @@ func getTagDigest(auth *authInfo, image imageInfo, regURI string, version _Regis
 	resp, err := client.R().Get(fmt.Sprintf(uri))
 	if err != nil {
 		Log.Criticalf("Error while getting Auth. Token: %s", err.Error())
-		return nil, err
+		return "", err
 	}
 
 	return resp.Header().Get("Docker-Content-Digest"), nil
