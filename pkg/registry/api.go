@@ -29,10 +29,18 @@ const (
 
 // Holds all Informations that are needed to talk with the Registry API
 type registry interface {
-	Init()				error			// Initialize Registry (and all required Components (Auth, ...))
-	ListRepositories()  []Repository	// List all Repositories found in the Registry
-	CheckRegistry()		(bool, error)	// Test Authentication, API Version (=> Compatibility)
-	FetchAll()			error			// Fetch _all_ Informations (Repos->Images->Tags) available in the Registry
+	// Initialize Registry (and all required Components (Auth, ...))
+	Init()				error
+
+	// List all Repositories found in the Registry
+	// `repoName`	is optional, define it to index Sub-Repositories
+	ListRepositories(repoName string)  []Repository
+
+	// Test Authentication, API Version (=> Compatibility)
+	CheckRegistry()		(bool, error)
+
+	// Fetch _all_ Informations (Repos->Images->Tags) available in the Registry
+	FetchAll()			error
 }
 
 // Holds/ Checks and gets needed Credentials/ Informations
