@@ -415,10 +415,11 @@ func (c *Credential) Init()	error {
 
 	// get Password
 	pwdEnclave, err := internal.Cred.GetCredential("password")
-	if err != nil {
-		Log.PanicF("Error while getting Credential from CredStore: %s", err.Error())
-	}
+	if err != nil { Log.PanicF("Error while getting Credential from CredStore: %s", err.Error()) }
 	c.Password = pwdEnclave
+
+	// get and set Username
+	c.Username = conf.Regitry.Username
 
 	password, err = pwdEnclave.Open()
 	if err != nil {
