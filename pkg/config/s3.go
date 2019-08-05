@@ -3,7 +3,7 @@ package config
 
 type S3Conf struct {
 	// Enable or Disable the S3 Component
-	Enabled			string		`mapstructure:"enabled"`
+	Enabled			bool		`mapstructure:"enabled"`
 
 	// S3 Endpoint of the S3 Server. For Example "play.min.io"
 	S3Endpoint		string		`mapstructure:"endpoint"`
@@ -15,5 +15,5 @@ type S3Conf struct {
 	SecretAccessKey	string		`mapstructure:"endpoint"`
 
 	// Use SSL to connect to the S3 Server
-	UseSSL			string		`mapstructure:"endpoint"`
+	UseSSL			bool		`mapstructure:"endpoint"`
 }
