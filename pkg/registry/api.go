@@ -65,7 +65,7 @@ type repository interface {
 
 // An Image represents a **single** Docker Image (with _Tag)
 type image interface {
-	ListImageTags() []_Tag 				// List all available Tags of a Image
+	ListImageTags() ([]Tag, error)		// List all available Tags of a Image
 	FetchAllTags()	error				// Fetch _all_ Tags from the Image
 }
 
