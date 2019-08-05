@@ -12,8 +12,12 @@ import (
 	rw "github.com/mattn/go-runewidth"
 	"image"
 
+	"github.com/fabmation-gmbh/oima/internal"
 	. "github.com/fabmation-gmbh/oima/internal/log"
+	"github.com/fabmation-gmbh/oima/pkg/config"
 )
+
+var conf config.Configuration
 
 type ImageInfo struct {
 	Block
@@ -32,6 +36,9 @@ type ImageInfo struct {
 }
 
 func NewImageInfo() *ImageInfo {
+	// init @conf
+	conf = internal.GetConfig()
+
 	return &ImageInfo{
 		Block:            *NewBlock(),
 		Rows:             nil,
@@ -179,11 +186,16 @@ func (ii *ImageInfo) ScrollBottom() {
 //  new Informations about the (new) selected Tag
 func (ii *ImageInfo) updateTagInfo() {
 	if ii.ImageTagInfo != nil {
+		// get S3 Signature Status
+		var s3Signature string
+		if !conf.S3.Enabled { s3Signature = "[S3 Component Disabled](fg:red)" }
+		// TODO: Implement S3 Signature Check
+
 		ii.ImageTagInfo.Rows = []string{
 			"",
 			fmt.Sprintf("[Tag Name:](mod:bold,fg:clear)              %s", (*ii.Rows)[ii.SelectedRow].TagName),
 			fmt.Sprintf("[Content Digest:](mod:bold,fg:clear)        %s", (*ii.Rows)[ii.SelectedRow].ContentDigest),
-			fmt.Sprintf("[Signature found in S3:](mod:bold,fg:clear) %s","[NOT IMPLEMENTED](fg:red)"), // TODO: Implement S3 Signature Check
+			fmt.Sprintf("[Signature found in S3:](mod:bold,fg:clear) %s", s3Signature),
 			"[](fg:clear)",
 		}
 	} else {

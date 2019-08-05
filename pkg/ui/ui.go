@@ -242,7 +242,6 @@ func showImageInfo(i *registry.Image) {
 		),
 	)
 
-
 	ui.Render(grid)
 }
 
