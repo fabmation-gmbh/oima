@@ -18,3 +18,8 @@ import:
   version: v0.18.2
 - package: github.com/go-resty/resty
   version: ~2.0.0
+- package: github.com/gizak/termui
+  version: ~3.1.0
+  subpackages:
+  - v3
+  - v3/widgets

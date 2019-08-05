@@ -1,5 +1,5 @@
-hash: 5960d20ea3383bb773a2c3e2cc2b5aa4fa5b45a840ab98fd82bde0def697def7
-updated: 2019-08-03T19:50:49.946115868+02:00
+hash: 0ef8457d9bd8cd51b3ae6f28fd13b1ddd5ef4606993074a27409955c0a7a84e4
+updated: 2019-08-05T13:09:19.688997957+02:00
 imports:
 - name: github.com/apsdehal/go-logger
   version: 1abdf898e0242cf7027d832c3e95388315c25de6
@@ -10,6 +10,12 @@ imports:
   - memcall
 - name: github.com/fsnotify/fsnotify
   version: 1485a34d5d5723fea214f5710708e19a831720e4
+- name: github.com/gizak/termui
+  version: 4cca61d83fa2cc0f485c478ff768b0108f6591d6
+  subpackages:
+  - v3
+  - v3/drawille
+  - v3/widgets
 - name: github.com/go-resty/resty
   version: d467d573085e42a848cb49c1c28ba163b7aa5872
 - name: github.com/google/go-containerregistry
@@ -32,10 +38,16 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/magiconair/properties
   version: de8848e004dd33dc07a2947b3d76f618a7fc7ef1
+- name: github.com/mattn/go-runewidth
+  version: 703b5e6b11ae25aeb2af9ebb5d5fdf8fa2575211
 - name: github.com/mitchellh/go-homedir
   version: af06845cf3004701891bf4fdb884bfe4920b3727
+- name: github.com/mitchellh/go-wordwrap
+  version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/mitchellh/mapstructure
   version: 53818660ed4955e899c0bcafa97299a388bd7c8e
+- name: github.com/nsf/termbox-go
+  version: eeb6cd0a176293eeb2c69270d83835972e3567bc
 - name: github.com/pelletier/go-toml
   version: 84da2c4a25c585816f2c4211b699228d111d18ab
 - name: github.com/spf13/afero
@@ -63,6 +75,10 @@ imports:
   - poly1305
   - salsa20/salsa
   - ssh/terminal
+- name: golang.org/x/net
+  version: 65e2d4e15006aab9813ff8769e768bbf4bb667a0
+  subpackages:
+  - publicsuffix
 - name: golang.org/x/sys
   version: b90733256f2e882e81d52f9126de08df5615afd9
   subpackages:
