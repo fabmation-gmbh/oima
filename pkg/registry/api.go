@@ -356,6 +356,7 @@ func (r *Repository) FetchAllImages() error {
 	return nil
 }
 
+
 //noinspection ALL
 func (i *Image) FetchAllTags() error {
 	// check Image Name
@@ -437,7 +438,25 @@ func (i *Image) FetchAllTags() error {
 	return nil
 }
 
+func (i* Image) ListImageTags() ([]Tag, error) {
+	if len(i.Name) == 0 {
+		Log.Fatal("[Internal Error] Trying to List Image Tags from an Image which Name is not set!!")
+		return nil, errors.NewImageNameNotDefinedError()
+	}
+
+	if i.Tags == nil || len(i.Tags) == 0 {
+		err := i.FetchAllTags()
+		if err != nil {
+			Log.Fatalf("Error while fetching all Tags of Image '%s': %s", i.Name, err.Error())
+			return nil, err
+		}
+	}
+
+	return i.Tags, nil
+}
+
 func (a *Auth) Init() { a.Cred.auth = a }
+
 
 //noinspection GoNilnesss
 func (c *Credential) Init()	error {
