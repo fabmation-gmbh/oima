@@ -6,7 +6,7 @@ type S3Conf struct {
 	Enabled			bool		`mapstructure:"enabled"`
 
 	// S3 Endpoint of the S3 Server. For Example "play.min.io"
-	S3Endpoint		string		`mapstructure:"endpoint"`
+	Endpoint		string		`mapstructure:"endpoint"`
 
 	// Access key is the user ID that uniquely identifies the S3 account
 	AccessKeyID		string		`mapstructure:"endpoint"`
