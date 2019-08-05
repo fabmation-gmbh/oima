@@ -456,19 +456,46 @@ func (c *Credential) Init()	error {
 			memguard.SafeExit(1)
 		}
 
-		err = json.Unmarshal(resp.Body(), &c.Token)
+		type _token struct {
+			// The BearerToken is needed to communicate with the Registry API
+			BearerToken		string				`json:"token"`
+
+			// Date when the token expires as Unix timestamp
+			ExpiresOn		int64				`json:"expires_in"`
+		}
+		tokenData := _token{}
+
+		err = json.Unmarshal(resp.Body(), &tokenData)
 		if err != nil {
 			Log.Debugf("Response: %s", resp.Body())
 			Log.Fatalf("Error while marshaling Response: %s", err.Error())
 			memguard.SafeExit(1)
 		}
 
-		Log.Debugf("Response: %s", c.Token)
+		// prepare Token
+		if c.Token.BearerToken == nil { c.Token.BearerToken = memguard.NewEnclaveRandom(len(tokenData.BearerToken)) }
+
+		bearerToken, err := c.Token.BearerToken.Open()
+		if err != nil { memguard.SafePanic(err) }
+		defer bearerToken.Destroy()
+
+		// make bearerToken immutable
+		bearerToken.Melt()
+
+		c.Token.ExpiresOn = tokenData.ExpiresOn
+		bearerToken.Copy([]byte(tokenData.BearerToken))
+
+
+		Log.Debugf("Response: %s", resp.Body())
 
 		// convert Seconds in BearerToken.ExpiresOn into Unix Timestamp
 		c.Token.ExpiresOn = time.Now().Unix() + c.Token.ExpiresOn
-		Log.Debugf("Bearer Token: '%s'", c.Token.BearerToken)
+		Log.Debugf("Bearer Token: '%s'", bearerToken.String())
 		Log.Debugf("Bearer Token Expires On %d (%s)", c.Token.ExpiresOn, time.Unix(c.Token.ExpiresOn, 0))
+
+		// return Encrypted Data back to Token Struct
+		c.Token.BearerToken = bearerToken.Seal()
+		memguard.ScrambleBytes([]byte(tokenData.BearerToken))
 	} else { Log.Notice("Authentication not required, so no need to get a Bearer Token") }
 
 	return nil
