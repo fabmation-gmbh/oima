@@ -6,13 +6,14 @@ import (
 	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/config"
 	"github.com/fabmation-gmbh/oima/pkg/errors"
+	"github.com/fabmation-gmbh/oima/pkg/registry"
 	"github.com/minio/minio-go"
 )
 
 var conf config.Configuration
 
 
-func (auth *S3Minio) InitS3() error {
+func (s *S3Minio) InitS3() error {
 	// initialize Config
 	conf = internal.GetConfig()
 
@@ -25,14 +26,20 @@ func (auth *S3Minio) InitS3() error {
 	// TODO: implement provider
 
 	// initialize Auth
-	auth.Auth = &S3AuthMinio{}
-	err := auth.Auth.InitAuth()
+	s.Auth = &S3AuthMinio{}
+	err := s.Auth.InitAuth()
 	if err != nil {
 		Log.Fatalf("Error while initializing MinIO S3 Authentication: %s", err.Error())
 		return err
 	}
 
 	return nil
+}
+
+func (s *S3Minio) SignatureExists(image *registry.Image) (bool, error) {
+
+
+	return true, nil
 }
 
 
