@@ -1,10 +1,16 @@
 package s3
 
-import "github.com/awnumar/memguard"
+import (
+	"github.com/awnumar/memguard"
+	"github.com/fabmation-gmbh/oima/pkg/registry"
+)
 
 type S3 interface {
 	// Initializes the S3 Datatypes
 	InitS3()			error
+
+	// Checks if a Signature for the Images exists on the S3 Server
+	SignatureExists(image *registry.Image)		(bool, error)
 }
 
 
