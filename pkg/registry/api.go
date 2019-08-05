@@ -286,11 +286,13 @@ func (r *Repository) ListImages() ([]Image, error) {
 
 	// fetch all Images (and Image Tags)
 	for _, v := range r.Images {
-		// fetch Tags
-		err := v.FetchAllTags()
-		if err != nil {
-			Log.Fatalf("Error while Fetching Image Tags: %s", err.Error())
-			return nil, err
+		// fetch Tags if len of Tags are 0
+		if v.Tags == nil || len(v.Tags) == 0 {
+			err := v.FetchAllTags()
+			if err != nil {
+				Log.Fatalf("Error while Fetching Image Tags: %s", err.Error())
+				return nil, err
+			}
 		}
 	}
 
