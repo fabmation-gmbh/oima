@@ -154,6 +154,7 @@ type Tag struct {
 
 /// >>>>>>>>>> Functions <<<<<<<<<< ///
 
+
 //noinspection GoNilness
 func (r *DockerRegistry) Init() error {
 	conf = internal.GetConfig()
