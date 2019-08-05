@@ -200,8 +200,10 @@ func (r *DockerRegistry) FetchAll() error {
 
 	if r.Authentication.Required {
 		// check if the Bearer Token is expired, and renew it if needed
-		if r.Authentication.Cred.Token.ExpiresOn >= time.Now().Unix() {
+		if r.Authentication.Cred.Token.ExpiresOn <= time.Now().Unix() {
 			// renew BearerToken
+			Log.Debugf("Re-Newing BearerToken because it's expired on %s", time.Unix(r.Authentication.Cred.Token.ExpiresOn, 0))
+
 			err := r.Authentication.Cred.getBearerToken()
 			if err != nil {
 				Log.Fatalf("Error while re-newing the BearerToken: %s", err.Error())
