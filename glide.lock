@@ -1,5 +1,5 @@
-hash: 0ef8457d9bd8cd51b3ae6f28fd13b1ddd5ef4606993074a27409955c0a7a84e4
-updated: 2019-08-05T13:09:19.688997957+02:00
+hash: 1122c8d5c653aa8d90b084e5dd769d7816a78d7b4eda459feb84a117f314fb3e
+updated: 2019-08-05T17:33:51.182165514+02:00
 imports:
 - name: github.com/apsdehal/go-logger
   version: 1abdf898e0242cf7027d832c3e95388315c25de6
@@ -40,6 +40,8 @@ imports:
   version: de8848e004dd33dc07a2947b3d76f618a7fc7ef1
 - name: github.com/mattn/go-runewidth
   version: 703b5e6b11ae25aeb2af9ebb5d5fdf8fa2575211
+- name: github.com/minio/minio-go
+  version: be06703be060e0c0c0505f31a3781b8908a32a00
 - name: github.com/mitchellh/go-homedir
   version: af06845cf3004701891bf4fdb884bfe4920b3727
 - name: github.com/mitchellh/go-wordwrap

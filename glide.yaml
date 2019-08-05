@@ -23,3 +23,5 @@ import:
   subpackages:
   - v3
   - v3/widgets
+- package: github.com/minio/minio-go
+  version: ^6.0.33
