@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"github.com/awnumar/memguard"
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
@@ -14,8 +15,9 @@ var tree []*TreeNode
 var grid *ui.Grid
 var repoImageTree *Tree
 var stats *widgets.List
-var imageInfo *widgets.List
-
+var imageTagInfo *widgets.List
+var tagList *ImageInfo
+var imageInfoUI bool			// imageInfoUI is true if user opened the Image Info Sub-UI
 
 type nodeValue string
 
@@ -25,7 +27,7 @@ func StartUI() {
 	initRegistry()
 
 	if err := ui.Init(); err != nil {
-		Log.Fatalf("failed to initialize termui: %v", err);
+		Log.Fatalf("failed to initialize termui: %v", err)
 		memguard.SafeExit(1)
 	}
 	defer ui.Close()
@@ -49,37 +51,59 @@ func StartUI() {
 		switch e.ID {
 		case "q", "<C-c>":
 			return
+		case "e", "E":
+			imageInfoUI = false
+
+			initGrid()
+			drawFunction()
 		case "j", "<Down>":
-			repoImageTree.ScrollDown()
+			if imageInfoUI {
+				tagList.ScrollDown()
+			} else {
+				repoImageTree.ScrollDown()
+			}
 		case "k", "<Up>":
-			repoImageTree.ScrollUp()
+			if imageInfoUI {
+				tagList.ScrollUp()
+			} else {
+				repoImageTree.ScrollUp()
+			}
 		case "<C-d>":
-			repoImageTree.ScrollHalfPageDown()
+			if imageInfoUI {
+				tagList.ScrollHalfPageDown()
+			} else {
+				repoImageTree.ScrollHalfPageDown()
+			}
 		case "<C-u>":
-			repoImageTree.ScrollHalfPageUp()
+			if imageInfoUI {
+				tagList.ScrollHalfPageUp()
+			} else {
+				repoImageTree.ScrollHalfPageUp()
+			}
 		case "<C-f>":
-			repoImageTree.ScrollPageDown()
+			if imageInfoUI {
+				tagList.ScrollPageDown()
+			} else {
+				repoImageTree.ScrollPageDown()
+			}
 		case "<C-b>":
-			repoImageTree.ScrollPageUp()
-		case "g":
-			if previousKey == "g" { repoImageTree.ScrollTop() }
-		case "<Home>":
-			repoImageTree.ScrollTop()
+			if imageInfoUI {
+				tagList.ScrollPageUp()
+			} else {
+				repoImageTree.ScrollPageUp()
+			}
 		case "<Enter>", "<Space>":
 			repoImageTree.ToggleExpand()
-		case "G", "<End>":
-			repoImageTree.ScrollBottom()
-		case "E":
-			repoImageTree.ExpandAll()
-		case "C":
-			repoImageTree.CollapseAll()
 		case "<Resize>":
 			x, y := ui.TerminalDimensions()
 			repoImageTree.SetRect(0, 0, x, y)
 		case "i", "I":
 			// check if selected Node is Image or Repository
 			if repoImageTree.SelectedNode().isImage() {
+				imageInfoUI = true
+
 				// update Image Info View
+				showImageInfo(&repoImageTree.SelectedNode().Image)
 			}
 		}
 
@@ -107,12 +131,12 @@ func drawFunction() {
 	repoImageTree.WrapText = false
 	repoImageTree.SetNodes(tree)
 
-	imageInfo = widgets.NewList()
-	imageInfo.Title = "Image Info"
-	imageInfo.Rows = []string{""}
-	imageInfo.TextStyle = ui.NewStyle(ui.ColorGreen)
-	imageInfo.WrapText = false
-	imageInfo.SetRect(0, 0, 25, 8)
+	imageTagInfo = widgets.NewList()
+	imageTagInfo.Title = "Image Info"
+	imageTagInfo.Rows = []string{""}
+	imageTagInfo.TextStyle = ui.NewStyle(ui.ColorGreen)
+	imageTagInfo.WrapText = false
+	imageTagInfo.SetRect(0, 0, 25, 8)
 
 	x, y := ui.TerminalDimensions()
 
@@ -120,12 +144,9 @@ func drawFunction() {
 
 	// add Items to grid
 	grid.Set(
-		ui.NewRow(0.75,
+		ui.NewRow(1,
 			ui.NewCol(0.75, repoImageTree),	// Repo/ Image Tree	(75%)
 			ui.NewCol(0.25, stats),			// Stats Panel		(25%)
-		),
-		ui.NewRow(0.25,
-			ui.NewCol(1, imageInfo),			// Image Information
 		),
 	)
 
@@ -192,8 +213,37 @@ func initGrid() {
 	grid.SetRect(0, 0, termWidth, termHeight)
 }
 
-func getImageInfo(i *registry.Image) {
+func setTagInfo(i *registry.Image) {
 
+}
+
+func showImageInfo(i *registry.Image) {
+	// TODO: Initialize ImageInfo
+
+	tagList = NewImageInfo()
+	tagList.Rows = &i.Tags
+	tagList.Title = fmt.Sprintf("%s Tags", i.Name)
+	tagList.TextStyle = ui.NewStyle(ui.ColorBlue)
+	tagList.ImageTagInfo = imageTagInfo
+
+	x, y := ui.TerminalDimensions()
+
+	tagList.SetRect(0, 0, x, y)
+
+	initGrid()
+
+	// change grid
+	grid.Set(
+		ui.NewRow(0.7,
+			ui.NewCol(1, tagList),			// List of Tags from Image
+		),
+		ui.NewRow(0.3,
+			ui.NewCol(1, imageTagInfo), // TODO: Show Digest and Signature Status
+		),
+	)
+
+
+	ui.Render(grid)
 }
 
 /// >>>>> internal Functions <<<<<
