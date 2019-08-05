@@ -57,6 +57,7 @@ var listCmd = &cobra.Command{
 			image, _ := v.ListImages()
 
 			for _, img := range image {
+				Log.Debugf(">> Image: %s", img.Name)
 				tags, err := img.ListImageTags()
 
 				if err != nil {
@@ -64,7 +65,7 @@ var listCmd = &cobra.Command{
 					os.Exit(1)
 				}
 
-				for _, tag := range tags { Log.Infof("-- Tag: %s || Content Digest: %s", tag.TagName, tag.ContentDigest) }
+				for _, tag := range tags { Log.Infof("  -- Tag: %s || Content Digest: %s", tag.TagName, tag.ContentDigest) }
 			}
 		}
 	},
