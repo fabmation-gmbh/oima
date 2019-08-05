@@ -175,6 +175,32 @@ func (r *DockerRegistry) Init() error {
 	if err != nil {
 		Log.PanicF("Could not Initialize Credentials: %s", err.Error())
 	}
+
+	// add Repo '/', this is a pseudonym for all Images
+	// which are stored at the Root Path (this is possible in e.g. JFrog Artifactory)
+	var doBreak bool
+	repo := Repository{
+		DockerRegistry: r,
+		Name:           "/",
+		Images:         nil,
+	}
+
+	// check if this Pseudonym already exists, because
+	// the Application could call Init() twice (or more)
+	for _, repoV := range r.Repos { if repoV.Name == "" { doBreak = true; break } }
+	if doBreak { doBreak = false }
+
+
+	// fetch Images from '/'
+	Log.Debugf("Fetching Images for Root of Registry '%s", r.URI)
+
+	err = repo.FetchAllImages()
+	if err != nil {
+		Log.Fatalf("Error while Fetching all Images: %s", err.Error())
+		return err
+	}
+	r.Repos = append(r.Repos, repo)
+
 	return nil
 }
 
@@ -230,6 +256,7 @@ func (r *DockerRegistry) FetchAll() error {
 
 	var doBreak bool
 	for _, val := range catalog {
+		// if Entry does not contain a '/' it means that it is a Image
 		if strings.Contains(val, "/") {
 			repoName := strings.Split(val, "/")
 			lenRepos := len(repoName)
@@ -266,7 +293,6 @@ func (r *DockerRegistry) FetchAll() error {
 			Log.Debugf("-- New Repo Entry: %s", repo.Name)
 		}
 	}
-
 	return nil
 }
 
@@ -331,10 +357,13 @@ func (r *Repository) FetchAllImages() error {
 	for _, v := range catalog {
 		if r.Images == nil { r.Images = []Image{} }
 		// check if Entry is an Image or an Repo
-		if strings.Contains(v, r.Name) && !strings.HasSuffix(v, "/") {
-			// check if Image is Entry of an Sub-Repo
-			// (eg 'nextcloud' is a Entry of the Sub-Repo 'library' in 'docker.io/library/nextcloud')
-			if strings.Count(v, "/") > (strings.Count(r.Name, "/") + 1) { continue }
+		if (strings.Contains(v, r.Name) || r.Name == "/") && !strings.HasSuffix(v, "/") {
+			// check if Repo is Root of the Registry
+			if r.Name != "/"{
+				// check if Image is Entry of an Sub-Repo
+				// (eg 'nextcloud' is a Entry of the Sub-Repo 'library' in 'docker.io/library/nextcloud')
+				if strings.Count(v, "/") > (strings.Count(r.Name, "/") + 1) { continue }
+			} else { if strings.Count(v, "/") > 0 { continue } }
 
 			newImage := Image{
 				Repository: r,
