@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/awnumar/memguard"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -176,6 +177,20 @@ func (r *DockerRegistry) Init() error {
 
 //noinspection GoNilness
 func (r *DockerRegistry) ListRepositories() []Repository {
+	// check if Repos where already fetched
+	if len(r.Repos) == 0 || r.Repos == nil {
+		// fetch all Informations
+		err := r.FetchAll()
+		if err != nil {
+			Log.Fatalf("Error while Fetching all Informations from Registry '%s': %s", r.URI, err.Error())
+			os.Exit(1)
+		}
+	}
+
+	return r.Repos
+}
+
+func (r *DockerRegistry) FetchAll() error {
 	// TODO: check if r.Authentication.Cred.Token is expired
 	authData := authInfo{
 		token:   nil,
@@ -199,7 +214,6 @@ func (r *DockerRegistry) ListRepositories() []Repository {
 		memguard.SafeExit(1)
 	}
 
-	// TODO: Move me to FetchAll()
 	var doBreak bool
 	for _, val := range catalog {
 		if strings.Contains(val, "/") {
@@ -225,22 +239,17 @@ func (r *DockerRegistry) ListRepositories() []Repository {
 			for _, repoV := range r.Repos { if repoV.Name == name { doBreak = true; break } }
 			if doBreak { doBreak = false; break }
 
+			// fetch Images from repo
+			Log.Debugf("Fetching Images for Repo '%s'", repo.Name)
+
+			err := repo.FetchAllImages()
+			if err != nil {
+				Log.Fatalf("Error while Fetching all Images: %s", err.Error())
+				return err
+			}
+
 			r.Repos = append(r.Repos, repo)
 			Log.Debugf("-- New Repo Entry: %s", repo.Name)
-		}
-	}
-
-	return r.Repos
-}
-
-func (r *DockerRegistry) FetchAll() error {
-	for _, v := range r.Repos {
-		Log.Debugf("Fetching Images for Repo '%s'", v.Name)
-
-		err := v.FetchAllImages()
-		if err != nil {
-			Log.Fatalf("Error while Fetching all Images: %s", err.Error())
-			return err
 		}
 	}
 
@@ -252,6 +261,14 @@ func (r *Repository) ListImages() ([]Image, error) {
 	if len(r.Name) == 0 {
 		Log.Fatal("[Internal Error] Trying to List Images about a Repo which Name is not set!!")
 		return nil, errors.NewRepositoryNameNotDefinedError()
+	}
+
+	if r.Images == nil {
+		err := r.FetchAllImages()
+		if err != nil {
+			Log.Fatalf("Error while fetching all Images from Repo '%s': %s", r.Name, err.Error())
+			memguard.SafeExit(1)
+		}
 	}
 
 	// fetch all Images (and Image Tags)
@@ -296,6 +313,8 @@ func (r *Repository) FetchAllImages() error {
 	}
 
 	for _, v := range catalog {
+		if r.Images == nil { r.Images = []Image{} }
+
 		// check if Entry is an Image or an Repo
 		if strings.Contains(v, r.Name) && !strings.HasSuffix(v, "/") {
 			//slashCountRepo := countSpecChart(r.Name, 47)
