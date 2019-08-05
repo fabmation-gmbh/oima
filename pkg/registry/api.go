@@ -330,9 +330,12 @@ func (r *Repository) FetchAllImages() error {
 
 	for _, v := range catalog {
 		if r.Images == nil { r.Images = []Image{} }
-
 		// check if Entry is an Image or an Repo
 		if strings.Contains(v, r.Name) && !strings.HasSuffix(v, "/") {
+			// check if Image is Entry of an Sub-Repo
+			// (eg 'nextcloud' is a Entry of the Sub-Repo 'library' in 'docker.io/library/nextcloud')
+			if strings.Count(v, "/") > (strings.Count(r.Name, "/") + 1) { continue }
+
 			//slashCountRepo := countSpecChart(r.Name, 47)
 			//slashCountImage := countSpecChart(v, 47)
 
