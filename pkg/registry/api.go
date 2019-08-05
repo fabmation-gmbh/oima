@@ -404,10 +404,10 @@ func (i *Image) FetchAllTags() error {
 	}
 
 	type _tags struct {
-		tags	[]string		// Array of all Tags of an Image
+		Tags []string 	`json:"tags"`	// Array of all Tags of an Image
 	}
 
-	var tags = _tags{}
+	var tags _tags
 
 	err = json.Unmarshal(resp.Body(), &tags)
 	if err != nil {
@@ -425,8 +425,9 @@ func (i *Image) FetchAllTags() error {
 		TagName:       "",
 		ContentDigest: "",
 	}
-	for _, v := range tags.tags {
+	for _, v := range tags.Tags {
 		imageData.tag = v
+		newTag.TagName = _Tag(v)
 
 		// get Image-Tag Digest
 		newTag.ContentDigest, err = getTagDigest(&authData, imageData,
@@ -460,6 +461,7 @@ func (i* Image) ListImageTags() ([]Tag, error) {
 
 	return i.Tags, nil
 }
+
 
 func (a *Auth) Init() { a.Cred.auth = a }
 
