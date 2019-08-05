@@ -38,6 +38,7 @@ type registry interface {
 	// List all Repositories found in the Registry
 	ListRepositories()  []Repository
 
+	// TODO
 	// Test Authentication, API Version (=> Compatibility)
 	CheckRegistry()		(bool, error)
 
