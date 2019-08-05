@@ -440,7 +440,7 @@ func (i *Image) FetchAllTags() error {
 
 		// add Tag to the other Tags
 		i.Tags = append(i.Tags, newTag)
-		Log.Debugf("Digest (%s:%s): %s", i.Name, imageData.tag, newTag.ContentDigest)
+		Log.Debugf("==> Digest (%s:%s): %s", i.Name, imageData.tag, newTag.ContentDigest)
 	}
 
 	return nil
