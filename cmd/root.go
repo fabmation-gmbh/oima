@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/fabmation-gmbh/oima/pkg/s3"
 	"os"
 
 	"github.com/apsdehal/go-logger"
@@ -80,11 +81,19 @@ track of all signed Images.`,
 		if Config.S3.Enabled {
 			// copy S3 access Key ID into CredStore
 			err := internal.Cred.AddCredential("s3_accessKeyID", []byte(Config.S3.AccessKeyID))
-			if err != nil { Log.Fatal(err.Error()) }
+			if err != nil { Log.Fatal(err.Error()); memguard.SafeExit(1) }
 
 			// copy S3 Secret access Key into CredStore
-			err = internal.Cred.AddCredential("s3_secretAccessKey", []byte(Config.S3.SecretAccessKey))
-			if err != nil { Log.Fatal(err.Error()) }
+			err = internal.Cred.AddCredential("s3_secretAccessKeyID", []byte(Config.S3.SecretAccessKey))
+			if err != nil { Log.Fatal(err.Error()); memguard.SafeExit(1) }
+
+			// initialize S3
+			S3Data := &s3.S3Minio{}
+			err = S3Data.InitS3()
+			if err != nil {
+				Log.Fatalf("Error while initializing MinIO S3 Client: %s", err.Error())
+				memguard.SafeExit(1)
+			}
 		} else {
 			Log.Debugf("The S3 Component of this CLI was disabled by User Configuration.")
 		}
