@@ -336,13 +336,6 @@ func (r *Repository) FetchAllImages() error {
 			// (eg 'nextcloud' is a Entry of the Sub-Repo 'library' in 'docker.io/library/nextcloud')
 			if strings.Count(v, "/") > (strings.Count(r.Name, "/") + 1) { continue }
 
-			//slashCountRepo := countSpecChart(r.Name, 47)
-			//slashCountImage := countSpecChart(v, 47)
-
-			//Log.Debugf("%d || %d", slashCountRepo, (slashCountImage + 1))
-
-			//if slashCountRepo != (slashCountImage + 1) { continue } // continue, because Entry is an Sub-Repo and not an Image
-
 			newImage := Image{
 				Repository: r,
 				Name:       v,
@@ -602,10 +595,4 @@ func getRegistryVersion(c *Credential) (_RegistryVersion, error) {
 	}
 
 	return version, nil
-}
-
-func countSpecChart(s string, c int) int {
-	var num int = 0
-	for _, v := range s { if int(v) == c { num++ } }
-	return num
 }
