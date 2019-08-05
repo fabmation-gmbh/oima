@@ -12,8 +12,9 @@ type S3Minio struct {
 
 //noinspection GoNameStartsWithPackageName
 type S3AuthMinio struct {
-	Endpoint          string            // S3 Server Endpoint
-	UseSSL            bool              // Communicate with S3 Server over SSL
+	Endpoint			string      // S3 Server Endpoint
+	BucketName			string		// S3 BucketName
+	UseSSL				bool        // Communicate with S3 Server over SSL
 
 
 	accessKeyID       *memguard.Enclave // Contains the Access Key ID securely

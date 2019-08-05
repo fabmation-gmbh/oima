@@ -16,4 +16,7 @@ type S3Conf struct {
 
 	// Use SSL to connect to the S3 Server
 	UseSSL			bool		`mapstructure:"useSSL"`
+
+	// BucketName defines the Bucket where the Signatures are stored
+	BucketName		string		`mapstructure:"bucketName"`
 }
