@@ -54,10 +54,18 @@ var listCmd = &cobra.Command{
 
 		for _, v := range dockerRegistry.ListRepositories() {
 			Log.Noticef(">>>>> Repository: %s (%d Images) <<<<<", v.Name, len(v.Images))
-
 			image, _ := v.ListImages()
 
-			for _, img := range image { Log.Noticef("Image '%s'", img.Name) }
+			for _, img := range image {
+				tags, err := img.ListImageTags()
+
+				if err != nil {
+					Log.Errorf("Error while getting Image Tags of Image '%s': %s", img.Name, err.Error())
+					os.Exit(1)
+				}
+
+				for _, tag := range tags { Log.Infof("-- Tag: %s || Content Digest: %s", tag.TagName, tag.ContentDigest) }
+			}
 		}
 	},
 }
