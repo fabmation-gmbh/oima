@@ -10,9 +10,9 @@ import (
 )
 
 var dockerReg registry.DockerRegistry
-var tree []*widgets.TreeNode
+var tree []*TreeNode
 var grid *ui.Grid
-var repoImageTree *widgets.Tree
+var repoImageTree *Tree
 var stats *widgets.List
 var imageInfo *widgets.List
 
@@ -37,7 +37,7 @@ func StartUI() {
 	tree = getTree()
 
 	// widgets
-	repoImageTree = widgets.NewTree()
+	repoImageTree = NewTree()
 
 	// draw UI
 	drawFunction()
@@ -76,6 +76,11 @@ func StartUI() {
 		case "<Resize>":
 			x, y := ui.TerminalDimensions()
 			repoImageTree.SetRect(0, 0, x, y)
+		case "i", "I":
+			// check if selected Node is Image or Repository
+			if repoImageTree.SelectedNode().isImage() {
+				// update Image Info View
+			}
 		}
 
 		if previousKey == "g" {
@@ -128,14 +133,14 @@ func drawFunction() {
 	ui.Render(grid)
 }
 
-func getTree() []*widgets.TreeNode {
+func getTree() []*TreeNode {
 	// get List of Repositories
 	repos := dockerReg.ListRepositories()
 	Log.Debugf("Registry %s has %d Repositories", dockerReg.URI, len(repos))
 
 	// create Tree
-	var nodes []*widgets.TreeNode
-	var _nodes []*widgets.TreeNode
+	var nodes []*TreeNode
+	var _nodes []*TreeNode
 
 	for _, v := range repos {
 		images, err := v.ListImages()
@@ -144,13 +149,14 @@ func getTree() []*widgets.TreeNode {
 			memguard.SafeExit(1)
 		}
 
-		var imageEntries []*widgets.TreeNode
+		var imageEntries []*TreeNode
 
 		// fill 'treeEntry' with Images
 		for _, img := range images {
-			imgEntry := widgets.TreeNode{
+			imgEntry := TreeNode{
 				Value:    nodeValue(img.Name),
 				Expanded: false,
+				Image:    img,
 				Nodes:    nil, // TODO: Implement Digest Information
 			}
 
@@ -158,7 +164,7 @@ func getTree() []*widgets.TreeNode {
 		}
 
 		// append Images to Repo Entry
-		repoEntry := widgets.TreeNode{
+		repoEntry := TreeNode{
 			Value:    nodeValue(v.Name),
 			Expanded: false,
 			Nodes:    imageEntries,
@@ -168,7 +174,7 @@ func getTree() []*widgets.TreeNode {
 		_nodes = append(_nodes, &repoEntry)
 	}
 
-	nodes = []*widgets.TreeNode{
+	nodes = []*TreeNode{
 		{
 			Value:    nodeValue(dockerReg.URI),
 			Expanded: true,
