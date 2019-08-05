@@ -14,6 +14,7 @@ var tree []*widgets.TreeNode
 var grid *ui.Grid
 var repoImageTree *widgets.Tree
 var stats *widgets.List
+var imageInfo *widgets.List
 
 
 type nodeValue string
@@ -101,15 +102,25 @@ func drawFunction() {
 	repoImageTree.WrapText = false
 	repoImageTree.SetNodes(tree)
 
+	imageInfo = widgets.NewList()
+	imageInfo.Title = "Image Info"
+	imageInfo.Rows = []string{""}
+	imageInfo.TextStyle = ui.NewStyle(ui.ColorGreen)
+	imageInfo.WrapText = false
+	imageInfo.SetRect(0, 0, 25, 8)
+
 	x, y := ui.TerminalDimensions()
 
 	repoImageTree.SetRect(0, 0, x, y)
 
 	// add Items to grid
 	grid.Set(
-		ui.NewRow(1,
-			ui.NewCol(0.75, repoImageTree), // Repo/ Image Tree	(75%)
-			ui.NewCol(0.25, stats),         // Stats Panel		(25%)
+		ui.NewRow(0.75,
+			ui.NewCol(0.75, repoImageTree),	// Repo/ Image Tree	(75%)
+			ui.NewCol(0.25, stats),			// Stats Panel		(25%)
+		),
+		ui.NewRow(0.25,
+			ui.NewCol(1, imageInfo),			// Image Information
 		),
 	)
 
@@ -173,6 +184,10 @@ func initGrid() {
 	grid = ui.NewGrid()
 	termWidth, termHeight := ui.TerminalDimensions()
 	grid.SetRect(0, 0, termWidth, termHeight)
+}
+
+func getImageInfo(i *registry.Image) {
+
 }
 
 /// >>>>> internal Functions <<<<<
