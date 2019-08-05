@@ -2,6 +2,9 @@ package config
 
 
 type S3Conf struct {
+	// Enable or Disable the S3 Component
+	Enabled			string		`mapstructure:"enabled"`
+
 	// S3 Endpoint of the S3 Server. For Example "play.min.io"
 	S3Endpoint		string		`mapstructure:"endpoint"`
 

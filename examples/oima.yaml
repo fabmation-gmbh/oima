@@ -5,6 +5,7 @@ registry:
   password: ""
 
 s3:
+  enabled: true
   endpoint: "play.min.io"
   accessKeyID: "Q3AM3UQ867SPQQA43P2F"
   secretAccessKey: "tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
