@@ -75,6 +75,19 @@ track of all signed Images.`,
 				Log.Fatal(err.Error())
 			}
 		}
+
+		// map S3 Credentials into CredStore
+		if Config.S3.Enabled {
+			// copy S3 access Key ID into CredStore
+			err := internal.Cred.AddCredential("s3_accessKeyID", []byte(Config.S3.AccessKeyID))
+			if err != nil { Log.Fatal(err.Error()) }
+
+			// copy S3 Secret access Key into CredStore
+			err = internal.Cred.AddCredential("s3_secretAccessKey", []byte(Config.S3.SecretAccessKey))
+			if err != nil { Log.Fatal(err.Error()) }
+		} else {
+			Log.Debugf("The S3 Component of this CLI was disabled by User Configuration.")
+		}
 	},
 }
 
