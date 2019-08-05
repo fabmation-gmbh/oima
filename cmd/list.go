@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"os"
 
 	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/registry"
@@ -42,14 +43,21 @@ var listCmd = &cobra.Command{
 		}
 
 		// list Repos
-		_ = dockerRegistry.ListRepositories()
-		_ = dockerRegistry.FetchAll()
+		repos := dockerRegistry.ListRepositories()
+		Log.Debugf("Returned %d Repositories", len(repos))
+
+		err = dockerRegistry.FetchAll()
+		if err != nil {
+			Log.Fatalf("Error while Fetching All Informations from Registry '%s': %s", dockerRegistry.URI, err.Error())
+			os.Exit(1)
+		}
 
 		for _, v := range dockerRegistry.ListRepositories() {
-			x, _ := v.ListImages()
-			for _, rV := range x {
-				rV.FetchAllTags()
-			}
+			Log.Noticef(">>>>> Repository: %s (%d Images) <<<<<", v.Name, len(v.Images))
+
+			image, _ := v.ListImages()
+
+			for _, img := range image { Log.Noticef("Image '%s'", img.Name) }
 		}
 	},
 }
