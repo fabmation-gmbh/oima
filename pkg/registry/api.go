@@ -80,7 +80,7 @@ type Auth struct {
 // The BearerToken is needed to communicate with the Registry API
 type BearerToken struct {
 	// The BearerToken is needed to communicate with the Registry API stored securely
-	BearerToken		memguard.Enclave	`json:"token"`
+	BearerToken		*memguard.Enclave	`json:"token"`
 
 	// Date when the token expires as Unix timestamp
 	ExpiresOn		int64				`json:"expires_in"`
