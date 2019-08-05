@@ -28,6 +28,7 @@ import (
 	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/config"
 	"github.com/fabmation-gmbh/oima/pkg/credential"
+	"github.com/fabmation-gmbh/oima/pkg/ui"
 )
 
 
@@ -54,6 +55,7 @@ manually delete the Directory/ Signature.
 This Tool automates this Process and helps to keep
 track of all signed Images.`,
 	Version: internal.GetVersion(),
+	Run: func(cmd *cobra.Command, args []string) { ui.StartUI()	},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// initialize CredStore struct
 		internal.Cred = new(credential.CredStore)
