@@ -411,8 +411,6 @@ func (a *Auth) Init() { a.Cred.auth = a }
 
 //noinspection GoNilnesss
 func (c *Credential) Init()	error {
-	var password *memguard.LockedBuffer
-
 	// get Password
 	pwdEnclave, err := internal.Cred.GetCredential("password")
 	if err != nil { Log.PanicF("Error while getting Credential from CredStore: %s", err.Error()) }
@@ -420,12 +418,6 @@ func (c *Credential) Init()	error {
 
 	// get and set Username
 	c.Username = conf.Regitry.Username
-
-	password, err = pwdEnclave.Open()
-	if err != nil {
-		memguard.SafePanic(err)
-	}
-	defer password.Destroy()
 
 	// get Registry Version
 	c.auth.dockerRegistry.Version, err = getRegistryVersion(c)
