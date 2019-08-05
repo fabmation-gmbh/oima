@@ -9,11 +9,11 @@ type S3Conf struct {
 	Endpoint		string		`mapstructure:"endpoint"`
 
 	// Access key is the user ID that uniquely identifies the S3 account
-	AccessKeyID		string		`mapstructure:"endpoint"`
+	AccessKeyID		string		`mapstructure:"accessKeyID"`
 
 	// Secret key is the password to the S3 account
-	SecretAccessKey	string		`mapstructure:"endpoint"`
+	SecretAccessKey	string		`mapstructure:"secretAccessKey"`
 
 	// Use SSL to connect to the S3 Server
-	UseSSL			bool		`mapstructure:"endpoint"`
+	UseSSL			bool		`mapstructure:"useSSL"`
 }
