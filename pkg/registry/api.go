@@ -193,13 +193,22 @@ func (r *DockerRegistry) ListRepositories() []Repository {
 }
 
 func (r *DockerRegistry) FetchAll() error {
-	// TODO: check if r.Authentication.Cred.Token is expired
 	authData := authInfo{
 		token:   nil,
 		authReq: r.Authentication.Required,
 	}
 
 	if r.Authentication.Required {
+		// check if the Bearer Token is expired, and renew it if needed
+		if r.Authentication.Cred.Token.ExpiresOn >= time.Now().Unix() {
+			// renew BearerToken
+			err := r.Authentication.Cred.getBearerToken()
+			if err != nil {
+				Log.Fatalf("Error while re-newing the BearerToken: %s", err.Error())
+				return err
+			}
+		}
+
 		token, err := r.Authentication.Cred.Token.BearerToken.Open()
 		if err != nil {
 			memguard.SafePanic(err)
