@@ -363,6 +363,8 @@ func (r *Repository) FetchAllImages() error {
 
 //noinspection ALL
 func (i *Image) FetchAllTags() error {
+	Log.Debugf("Fetching Tags for Image %s", i.Name)
+
 	// check Image Name
 	if len(i.Name) == 0 {
 		Log.Fatal("[Internal Error] Trying to fetch all Tags of an Image which Name is not set!!")
