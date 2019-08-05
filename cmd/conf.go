@@ -42,17 +42,17 @@ var confCmd = &cobra.Command{
 		}
 
 		// print Values
-		fmt.Printf("Registry URI: %s\n", conf.Regitry.RegistryURI)
+		fmt.Printf("Registry URI: %s\n", conf.Registry.RegistryURI)
 
-		if b, _ := strconv.ParseBool(conf.Regitry.RequireAuth); b {
+		if b, _ := strconv.ParseBool(conf.Registry.RequireAuth); b {
 			fmt.Printf("Authentication is required\n")
 		} else {
 			fmt.Printf("Authentication is not required\n")
 		}
 
-		fmt.Printf("Registry Username: %s\n", conf.Regitry.Username)
+		fmt.Printf("Registry Username: %s\n", conf.Registry.Username)
 
-		if len(conf.Regitry.Password) > 0 {
+		if len(conf.Registry.Password) > 0 {
 			fmt.Printf("Registry Password is set.\n")
 		} else {
 			fmt.Printf("Registry Password is not set!\n")

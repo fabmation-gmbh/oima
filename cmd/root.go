@@ -68,9 +68,9 @@ track of all signed Images.`,
 		Config = internal.GetConfig()
 
 		// map Credentials into CredStore
-		if len(Config.Regitry.Password) > 0 {
+		if len(Config.Registry.Password) > 0 {
 			// map User Password into CredStore
-			err := internal.Cred.AddCredential("password", []byte(Config.Regitry.Password))
+			err := internal.Cred.AddCredential("password", []byte(Config.Registry.Password))
 			if err != nil {
 				Log.Fatal(err.Error())
 			}

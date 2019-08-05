@@ -66,13 +66,13 @@ package cmd
 //	fmt.Println(">>>>> Docker Registry Configuration <<<<<")
 //	fmt.Print("Enter Docker Registry URI: ")
 //	registryURI, _ := reader.ReadString('\n')
-//	Config.Regitry.RegistryURI = registryURI
+//	Config.Registry.RegistryURI = registryURI
 //
 //	fmt.Print("Is Authentication Required? [Y|n]: ")
 //	authReq, _ := reader.ReadString('\n')
 //
 //	if len(authReq) == 0 || strings.ToLower(authReq) == "y" {
-//		Config.Regitry.RequireAuth = true
+//		Config.Registry.RequireAuth = true
 //
 //		fmt.Print("Enter Username: ")
 //		dockerUsername, _ := reader.ReadString('\n')
@@ -83,8 +83,8 @@ package cmd
 //			os.Exit(1)
 //		}
 //
-//		Config.Regitry.Username = dockerUsername
-//		Config.Regitry.Password = string(dockerPasswd)
+//		Config.Registry.Username = dockerUsername
+//		Config.Registry.Password = string(dockerPasswd)
 //	}
 //
 //	err := viper.Unmarshal(&Config)

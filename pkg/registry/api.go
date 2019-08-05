@@ -160,14 +160,14 @@ func (r *DockerRegistry) Init() error {
 	conf = internal.GetConfig()
 
 	// set Flags
-	r.URI = conf.Regitry.RegistryURI
+	r.URI = conf.Registry.RegistryURI
 	Log.Debugf("Set DockerRegistry URI: %s", r.URI)
 
 	// set parent Pointer back to this struct
 	r.Authentication.dockerRegistry = r
 
 	// Initialize Auth Struct
-	b, _ := strconv.ParseBool(conf.Regitry.RequireAuth)
+	b, _ := strconv.ParseBool(conf.Registry.RequireAuth)
 	r.Authentication.Required = b
 
 	r.Authentication.Init()
@@ -501,7 +501,7 @@ func (c *Credential) Init()	error {
 	c.Password = pwdEnclave
 
 	// get and set Username
-	c.Username = conf.Regitry.Username
+	c.Username = conf.Registry.Username
 
 	// get Registry Version
 	c.auth.dockerRegistry.Version, err = getRegistryVersion(c)
