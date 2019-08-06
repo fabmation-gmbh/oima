@@ -191,7 +191,11 @@ func (ii *ImageInfo) updateTagInfo() {
 		if !conf.S3.Enabled {
 			s3SignatureStatus = "[S3 Component Disabled](fg:red)"
 		} else {
-
+			if (*ii.Rows)[ii.SelectedRow].S3SignFound {
+				s3SignatureStatus = "[Signature found](fg:green)"
+			} else {
+				s3SignatureStatus = "[Signature not found](fg:red)"
+			}
 		}
 
 		ii.ImageTagInfo.Rows = []string{
