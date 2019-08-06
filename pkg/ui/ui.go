@@ -243,7 +243,7 @@ func showImageInfo(i *registry.Image) {
 			ui.NewCol(1, tagList),			// List of Tags from Image
 		),
 		ui.NewRow(0.3,
-			ui.NewCol(1, imageTagInfo), // TODO: Show Digest and Signature Status
+			ui.NewCol(1, imageTagInfo),
 		),
 	)
 
