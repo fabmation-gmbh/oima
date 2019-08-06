@@ -33,6 +33,11 @@ type ImageInfo struct {
 	// about the selected Tag.
 	// @ImageTagInfo can also be _nil_
 	ImageTagInfo		*widgets.List
+
+	// ImagePtr points back to the original Image,
+	// this is needed because BaseImage contains
+	// the Function to delete Signatures
+	ImagePtr			*rt.BaseImage
 }
 
 func NewImageInfo() *ImageInfo {
@@ -177,6 +182,15 @@ func (ii *ImageInfo) ScrollBottom() {
 	ii.SelectedRow = len(*ii.Rows) - 1
 
 	// update shown Tag Info
+	ii.updateTagInfo()
+}
+
+func (ii *ImageInfo) DeleteSignature() {
+	// delete Signature
+	(*ii.ImagePtr).DeleteSignature(&(*ii.Rows)[ii.SelectedRow])
+
+	// update Tag Informations
+	(*ii.Rows)[ii.SelectedRow].S3SignFound = false
 	ii.updateTagInfo()
 }
 

@@ -45,6 +45,8 @@ type BaseImage interface {
 	ListImageTags() 	([]Tag, error)		// List all available Tags of a Image
 	FetchAllTags()		error					// Fetch _all_ Tags from the Image
 
+	DeleteSignature(*Tag)					// Delete the Signature of an Tag from the S3-Server
+
 
 	/// >>>>>>>>>> Getter & Setter <<<<<<<<<<
 

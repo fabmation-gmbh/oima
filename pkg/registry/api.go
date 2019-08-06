@@ -551,6 +551,25 @@ func (i *Image) GetRegistryURI() string { return i.Repository.DockerRegistry.URI
 
 func (i *Image) GetName() string { return i.Name }
 
+func (i *Image) DeleteSignature(t *rt.Tag) {
+	Log.Debugf("Deleting Signature of Tag '%s' from Image '%s'", t.Name, i.Name)
+
+	// search for Tag in Tags
+	for _, v := range i.Tags {
+		if v.Name == t.Name {
+			objCtxPath := fmt.Sprintf("%s/%s@%s", s3.PrepareRegPath(i.Repository.DockerRegistry.URI), i.Name,
+				strings.ReplaceAll(string(v.ContentDigest), ":", "="))
+			i.Repository.DockerRegistry.s3Cli.DeleteSignature(objCtxPath, &v)
+
+			v.S3SignFound = false
+			Log.Debugf("Signature deleted!")
+			break
+		}
+	}
+
+}
+
+
 func (a *Auth) Init() { a.Cred.auth = a }
 
 

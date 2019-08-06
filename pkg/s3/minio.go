@@ -99,6 +99,14 @@ func (s *S3Minio) FetchSignatures(image *rt.BaseImage) error {
 	return nil
 }
 
+func (s *S3Minio) DeleteSignature(ctxPath string, tag *rt.Tag) {
+	err := internal.S3Client.RemoveObject(s.Auth.BucketName, fmt.Sprintf("%s/signature-1", ctxPath))
+	if err != nil {
+		Log.Fatalf("Error while trying to delete Signature from '%s': %s", ctxPath, err.Error())
+		memguard.SafeExit(1)
+	}
+}
+
 
 func (auth *S3AuthMinio) InitAuth() error {
 

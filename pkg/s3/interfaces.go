@@ -12,6 +12,11 @@ type S3 interface {
 	// Fetches Signatures of all Tags of an Image and sets the Bool
 	// in image.Tags[n].S3SignFound = "Signature Found?"
 	FetchSignatures(image *rt.BaseImage)		error
+
+	// Deletes a Signature of the specific Tag from the S3-Server
+	// @ctxPath	describes the Full converted Path of registry+image+tag_info
+	//			do **NOT** add any annotations like '/signature-1'!!
+	DeleteSignature(ctxPath string, tag *rt.Tag)
 }
 
 

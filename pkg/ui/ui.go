@@ -8,6 +8,7 @@ import (
 
 	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/registry"
+	rt "github.com/fabmation-gmbh/oima/pkg/registry/interfaces"
 )
 
 var dockerReg registry.DockerRegistry
@@ -56,6 +57,8 @@ func StartUI() {
 
 			initGrid()
 			drawFunction()
+		case "d", "D":
+			if imageInfoUI { tagList.DeleteSignature() }
 		case "j", "<Down>":
 			if imageInfoUI {
 				tagList.ScrollDown()
@@ -218,10 +221,12 @@ func setTagInfo(i *registry.Image) {
 }
 
 func showImageInfo(i *registry.Image) {
-	// TODO: Initialize ImageInfo
+	var img rt.BaseImage
+	img = i
 
 	tagList = NewImageInfo()
 	tagList.Rows = &i.Tags
+	tagList.ImagePtr = &img
 	tagList.Title = fmt.Sprintf("%s Tags", i.Name)
 	tagList.TextStyle = ui.NewStyle(ui.ColorBlue)
 	tagList.ImageTagInfo = imageTagInfo
