@@ -90,6 +90,7 @@ func (auth *S3AuthMinio) InitAuth() error {
 	// initialize objects of Struct
 	auth.Endpoint = conf.S3.Endpoint
 	auth.UseSSL = conf.S3.UseSSL
+	auth.BucketName = conf.S3.BucketName
 
 	// initialize Minio Client object
 	internal.S3Client, err = minio.New(auth.Endpoint, accessKeyID.String(), secretAccessKeyID.String(), auth.UseSSL)
