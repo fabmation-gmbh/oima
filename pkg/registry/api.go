@@ -151,6 +151,7 @@ type Image struct {
 type Tag struct {
 	TagName			_Tag				// Image Tag (eg 'v1.0.0')
 	ContentDigest	string				// Docker Content Digest
+	S3SignFound		bool				// Is a Signature found on the S3 Server
 }
 
 
