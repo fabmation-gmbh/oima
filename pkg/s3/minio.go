@@ -3,14 +3,15 @@ package s3
 import (
 	"fmt"
 	"github.com/awnumar/memguard"
+	"github.com/minio/minio-go"
+	"regexp"
+	"strings"
+
 	"github.com/fabmation-gmbh/oima/internal"
 	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/config"
 	"github.com/fabmation-gmbh/oima/pkg/errors"
-	"github.com/fabmation-gmbh/oima/pkg/registry"
-	"github.com/minio/minio-go"
-	"regexp"
-	"strings"
+	rt "github.com/fabmation-gmbh/oima/pkg/registry/interfaces"
 )
 
 var conf config.Configuration
@@ -40,24 +41,25 @@ func (s *S3Minio) InitS3() error {
 }
 
 // SignatureExists() checks if all Signatures of all
-func (s *S3Minio) FetchSignatures(image *registry.Image) error {
-	// check if @image is Empty
-	if len(image.Tags) == 0 {
-		Log.Fatal("Requested Image is Empty (empty Struct)!")
-		memguard.SafeExit(1)
-	}
+func (s *S3Minio) FetchSignatures(image *rt.BaseImage) error {
+	//// check if @image is Empty
+	//if len((*image).GetTags()) == 0 {
+	//	Log.Fatal("Requested Image is Empty (empty Struct)!")
+	//	memguard.SafeExit(1)
+	//}
+	tags := (*image).GetTags()
 
 	// create object Path Prefix
 	r, _ := regexp.Compile("http(s)?://")					// remove 'https://' or 'http://'
-	registryName := strings.ReplaceAll(r.ReplaceAllString(image.Repository.DockerRegistry.URI, ""), "/", "")
-	objPathPrefix := fmt.Sprintf("%s/%s@", registryName, image.Name)
+	registryName := strings.ReplaceAll(r.ReplaceAllString((*image).GetRegistryURI(), ""), "/", "")
+	objPathPrefix := fmt.Sprintf("%s/%s@", registryName, (*image).GetName())
 
 	doneCh := make(chan struct{})
 	defer close(doneCh)
 
 	// check Tag Objects at the S3 MinIO Server
-	for iTag, _ := range image.Tags {
-		objName := fmt.Sprintf("%s%s/signature-1", objPathPrefix, strings.ReplaceAll(image.Tags[iTag].ContentDigest, ":", "="))
+	for iTag, _ := range tags {
+		objName := fmt.Sprintf("%s%s/signature-1", objPathPrefix, strings.ReplaceAll(tags[iTag].ContentDigest, ":", "="))
 
 		_, err := internal.S3Client.StatObject(s.Auth.BucketName, objName, minio.StatObjectOptions{})
 		if err != nil {
@@ -77,19 +79,22 @@ func (s *S3Minio) FetchSignatures(image *registry.Image) error {
 			} else if errResponse.Code == "NoSuchKey" {
 				// Signature File does not exists
 				signNotFound = true
-				image.Tags[iTag].S3SignFound = false
+				tags[iTag].S3SignFound = false
 			} else {
 				errMsg = fmt.Sprintf("Unknown Error while getting Object for Image '%s@%s': %s",
-										image.Name, image.Tags[iTag].ContentDigest, err.Error())
+										(*image).GetName(), tags[iTag].ContentDigest, err.Error())
 			}
 
 			if !signNotFound {
 				Log.Critical(errMsg)
 				memguard.SafeExit(1)
 			}
-		} else { image.Tags[iTag].S3SignFound = true }
+		} else { tags[iTag].S3SignFound = true }
 		//Log.Debugf("++>> Object Path: %s", objName)
 	}
+
+	// update Tags from Image
+	(*image).SetTags(tags)
 
 	return nil
 }
