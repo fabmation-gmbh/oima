@@ -255,7 +255,7 @@ func (r *DockerRegistry) FetchAll() error {
 		memguard.SafeExit(1)
 	}
 
-	var doBreak bool
+	var skipRepo bool
 	for _, val := range catalog {
 		// if Entry does not contain a '/' it means that it is a Image
 		if strings.Contains(val, "/") {
@@ -278,8 +278,8 @@ func (r *DockerRegistry) FetchAll() error {
 			}
 
 			// check if a Repo already exists with that Name
-			for _, repoV := range r.Repos { if repoV.Name == name { doBreak = true; break } }
-			if doBreak { doBreak = false; break }
+			for _, repoV := range r.Repos { if repoV.Name == name { skipRepo = true; break } }
+			if skipRepo { skipRepo = false; continue }
 
 			// fetch Images from repo
 			Log.Debugf("Fetching Images for Repo '%s'", repo.Name)
