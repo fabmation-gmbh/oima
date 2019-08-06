@@ -6,7 +6,6 @@ package ui
 
 import (
 	"fmt"
-	"github.com/fabmation-gmbh/oima/pkg/registry"
 	. "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 	rw "github.com/mattn/go-runewidth"
@@ -15,6 +14,7 @@ import (
 	"github.com/fabmation-gmbh/oima/internal"
 	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/config"
+	rt "github.com/fabmation-gmbh/oima/pkg/registry/interfaces"
 )
 
 var conf config.Configuration
@@ -22,7 +22,7 @@ var conf config.Configuration
 type ImageInfo struct {
 	Block
 
-	Rows				*[]registry.Tag
+	Rows				*[]rt.Tag
 	WrapText			bool
 	TextStyle			Style
 	SelectedRow			int
@@ -62,7 +62,7 @@ func (ii *ImageInfo) Draw(buf *Buffer) {
 
 	// draw rows
 	for row := ii.topRow; row < len(*ii.Rows) && point.Y < ii.Inner.Max.Y; row++ {
-		cells := ParseStyles(string((*ii.Rows)[row].TagName), ii.TextStyle)
+		cells := ParseStyles(string((*ii.Rows)[row].Name), ii.TextStyle)
 		if ii.WrapText {
 			cells = WrapCells(cells, uint(ii.Inner.Dx()))
 		}
@@ -193,7 +193,7 @@ func (ii *ImageInfo) updateTagInfo() {
 
 		ii.ImageTagInfo.Rows = []string{
 			"",
-			fmt.Sprintf("[Tag Name:](mod:bold,fg:clear)              %s", (*ii.Rows)[ii.SelectedRow].TagName),
+			fmt.Sprintf("[Tag Name:](mod:bold,fg:clear)              %s", (*ii.Rows)[ii.SelectedRow].Name),
 			fmt.Sprintf("[Content Digest:](mod:bold,fg:clear)        %s", (*ii.Rows)[ii.SelectedRow].ContentDigest),
 			fmt.Sprintf("[Signature found in S3:](mod:bold,fg:clear) %s", s3Signature),
 			"[](fg:clear)",
