@@ -295,6 +295,34 @@ func (r *DockerRegistry) FetchAll() error {
 	return nil
 }
 
+func (r *DockerRegistry) Stats() rt.Stats {
+	// Update Registry Data (Repos, Images, ...)
+	err := r.FetchAll()
+	if err != nil { Log.Panicf("Error while Fetching Repository Data") }
+
+	var images, tags, s3signatures int = 0, 0, 0
+
+	for _, repo := range r.Repos {
+		// count Images
+		for _, img := range repo.Images {
+			images++
+
+			// count Tags
+			for _, tag := range img.Tags {
+				tags++
+				if tag.S3SignFound { s3signatures++ }
+			}
+		}
+	}
+
+	return rt.Stats{
+		Repos:        len(r.Repos),
+		Images:       images,
+		Tags:         tags,
+		S3Signatures: s3signatures,
+	}
+}
+
 
 func (r *Repository) ListImages() ([]Image, error) {
 	if len(r.Name) == 0 {
