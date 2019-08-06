@@ -93,7 +93,7 @@ func (auth *S3AuthMinio) InitAuth() error {
 	auth.BucketName = conf.S3.BucketName
 
 	// initialize Minio Client object
-	internal.S3Client, err = minio.New(auth.Endpoint, accessKeyID.String(), secretAccessKeyID.String(), auth.UseSSL)
+	internal.S3Client, err = minio.New(auth.Endpoint, conf.S3.AccessKeyID, conf.S3.SecretAccessKey, auth.UseSSL)
 	if err != nil {
 		Log.Fatalf("Error while initializing MinIO Client: %s", err.Error())
 		memguard.SafeExit(1)
