@@ -22,6 +22,8 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"github.com/awnumar/memguard"
+	"github.com/fabmation-gmbh/oima/pkg/s3"
 	"github.com/spf13/cobra"
 	"os"
 
@@ -68,6 +70,20 @@ var listCmd = &cobra.Command{
 				for _, tag := range tags { Log.Infof("  -- Tag: %s || Content Digest: %s", tag.TagName, tag.ContentDigest) }
 			}
 		}
+
+
+		// S3 Implementation Test
+		var minioS3 s3.S3
+		minioS3 = &s3.S3Minio{}
+
+		err = minioS3.InitS3()
+		if err != nil {
+			Log.Fatalf("Error while Initializing S3 Struct: %s", err.Error())
+			memguard.SafeExit(1)
+		} else {
+			Log.Notice("S3 Struct initialized successfully")
+		}
+
 	},
 }
 
