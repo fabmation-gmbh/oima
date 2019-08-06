@@ -44,6 +44,18 @@ var listCmd = &cobra.Command{
 			Log.Panicf("Error while Initialize DockerRegistry: %s", err.Error())
 		}
 
+		// =====] S3 Implementation Test [=====
+		var minioS3 s3.S3
+		minioS3 = &s3.S3Minio{}
+
+		err = minioS3.InitS3()
+		if err != nil {
+			Log.Fatalf("Error while Initializing S3 Struct: %s", err.Error())
+			memguard.SafeExit(1)
+		} else {
+			Log.Notice("S3 Struct initialized successfully")
+		}
+
 		// list Repos
 		repos := dockerRegistry.ListRepositories()
 		Log.Debugf("Returned %d Repositories", len(repos))
@@ -67,23 +79,18 @@ var listCmd = &cobra.Command{
 					os.Exit(1)
 				}
 
-				for _, tag := range tags { Log.Infof("  -- Tag: %s || Content Digest: %s", tag.TagName, tag.ContentDigest) }
+				// check S3 Signature
+				// list Objects
+				err = minioS3.FetchSignatures(&img)
+				if err != nil {
+					Log.Errorf("Error while checking Signature of Image: %s", err.Error())
+					memguard.SafeExit(1)
+				}
+
+				for _, tag := range tags { Log.Infof("  -- Tag: %s || Signature Found: %t || Content Digest: %s",
+																tag.TagName, tag.S3SignFound, tag.ContentDigest) }
 			}
 		}
-
-
-		// S3 Implementation Test
-		var minioS3 s3.S3
-		minioS3 = &s3.S3Minio{}
-
-		err = minioS3.InitS3()
-		if err != nil {
-			Log.Fatalf("Error while Initializing S3 Struct: %s", err.Error())
-			memguard.SafeExit(1)
-		} else {
-			Log.Notice("S3 Struct initialized successfully")
-		}
-
 	},
 }
 
