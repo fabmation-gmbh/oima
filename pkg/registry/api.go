@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/awnumar/memguard"
+	"github.com/fabmation-gmbh/oima/pkg/s3"
 	"os"
 	"sort"
 	"strconv"
@@ -67,6 +68,9 @@ type DockerRegistry struct {
 	URI				string				// Registry URI
 	Authentication	Auth				// Authentication Informations and Credentials
 	Repos			[]Repository		// List of all Repos in the Registry
+
+	s3Cli			s3.S3				// S3 Object to check and edit Signatures
+	s3Enabled		bool				// Check if S3 Server is disabled by user
 }
 
 // A (Docker) Repository is (for example) the 'atlassian-jira' in 'docker.reg.local/atlassian-jira:v1.0.0'
@@ -156,6 +160,23 @@ func (r *DockerRegistry) Init() error {
 		return err
 	}
 	r.Repos = append(r.Repos, repo)
+
+
+	// initialize S3 Server
+	if conf.S3.Enabled {
+		Log.Debugf("Initializing S3 Object")
+		r.s3Enabled = true
+		r.s3Cli = &s3.S3Minio{}
+
+		err = r.s3Cli.InitS3()
+		if err != nil {
+			Log.Fatalf("Error while Initializing S3 Struct: %s", err.Error())
+			return err
+		} else { Log.Notice("S3 Struct initialized successfully") }
+
+	} else {
+		Log.Debugf("S3 Server Component was disabled by User Conf.")
+	}
 
 	return nil
 }
@@ -363,6 +384,16 @@ func (r *Repository) FetchAllImages() error {
 					memguard.SafeExit(1)
 				}
 
+				// check Signatures on S3 if S3 is enabled
+				if r.DockerRegistry.s3Enabled {
+					var img rt.BaseImage = &newImage
+					err = r.DockerRegistry.s3Cli.FetchSignatures(&img)
+					if err != nil {
+						Log.Fatalf("Error while Fetching Signatures for Image %s on S3 Server", newImage.Name)
+						memguard.SafeExit(1)
+					}
+				}
+
 				r.Images = append(r.Images, newImage)
 				Log.Debugf("--> Add new Image: %s", newImage.Name)
 			}
@@ -383,7 +414,6 @@ func (r *Repository) FetchAllImages() error {
 
 	return nil
 }
-
 
 //noinspection ALL
 func (i *Image) FetchAllTags() error {
