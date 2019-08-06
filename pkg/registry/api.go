@@ -18,12 +18,12 @@ import (
 	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/config"
 	"github.com/fabmation-gmbh/oima/pkg/errors"
+	rt "github.com/fabmation-gmbh/oima/pkg/registry/interfaces"
 )
 
 var conf config.Configuration
 
 
-type _Tag string             // _Tag of an Image (for example 'v1.0.0' or '0.1.0-beta'
 type _RegistryVersion string // Describes the current Version of the Registry API
 const (
 	VUNK _RegistryVersion	= "UNKNOWN"	// Unknown Registry API Version
@@ -31,48 +31,6 @@ const (
 	V1	_RegistryVersion	= "v1"		// (Docker) Registry API Version v1
 	V2	_RegistryVersion	= "v2"		// (Docker) Registry API Version v1
 )
-
-// Holds all Informations that are needed to talk with the Registry API
-type registry interface {
-	// Initialize Registry (and all required Components (Auth, ...))
-	Init()				error
-
-	// List all Repositories found in the Registry
-	ListRepositories()  []Repository
-
-	// TODO
-	// Test Authentication, API Version (=> Compatibility)
-	CheckRegistry()		(bool, error)
-
-	// Fetch _all_ Informations (Repos->Images->Tags) available in the Registry
-	FetchAll()			error
-}
-
-// Holds/ Checks and gets needed Credentials/ Informations
-// to communicate with the Registry API
-type credential interface {
-	Init(cred *Credential)	error		// Checks and "Initializes" the Credential Struct
-
-	getBearerToken()		error		// getBearerToken() sets/ renews the Token in Credential.Token.BearerToken
-}
-
-type auth interface {
-	Init()
-}
-
-// A (Docker) Repository is (for example) the 'atlassian-jira' in 'docker.reg.local/atlassian-jira:v1.0.0'
-type repository interface {
-	ListImages()		([]Image, error)	// List all available Images
-	FetchAllImages()	error				// Fetch _all_ Image Informations (Images->Tags) available in the Repository
-}
-
-// An Image represents a **single** Docker Image (with _Tag)
-type image interface {
-	ListImageTags() ([]Tag, error)		// List all available Tags of a Image
-	FetchAllTags()	error				// Fetch _all_ Tags from the Image
-}
-
-
 
 
 // Registry Authentication Information
@@ -143,16 +101,10 @@ type Image struct {
 	Repository		*Repository			// Pointer to Parent Struct
 
 	Name			string  			// Image Name (eg. 'nginx')
-	Tags			[]Tag  				// List of all available Tags
+	Tags			[]rt.Tag  				// List of all available Tags
 }
 
-// Describes a Tag of a Image in a Repository
-// Implements the @tag Interface
-type Tag struct {
-	TagName			_Tag				// Image Tag (eg 'v1.0.0')
-	ContentDigest	string				// Docker Content Digest
-	S3SignFound		bool				// Is a Signature found on the S3 Server
-}
+
 
 
 /// >>>>>>>>>> Functions <<<<<<<<<< ///
@@ -502,13 +454,13 @@ func (i *Image) FetchAllTags() error {
 				tag:  "",
 			}
 
-			newTag := Tag{
-				TagName:       "",
+			newTag := rt.Tag{
+				Name:          "",
 				ContentDigest: "",
 			}
 
 			imageData.tag = v
-			newTag.TagName = _Tag(v)
+			newTag.Name = rt.TagName(v)
 
 			// get Image-Tag Digest
 			newTag.ContentDigest, err = getTagDigest(&authData, imageData,
@@ -536,12 +488,12 @@ func (i *Image) FetchAllTags() error {
 	// TODO:   => (eg) by calling a Image.AddTag(...) Function
 	// TODO:      and this functions adds the Repo at the optimal place
 	// sort Tags (this increases the runtime about +58,581839 %)
-	sort.Slice(i.Tags, func(index, j int) bool { return i.Tags[index].TagName < i.Tags[j].TagName })
+	sort.Slice(i.Tags, func(index, j int) bool { return i.Tags[index].Name < i.Tags[j].Name })
 
 	return nil
 }
 
-func (i* Image) ListImageTags() ([]Tag, error) {
+func (i* Image) ListImageTags() ([]rt.Tag, error) {
 	if len(i.Name) == 0 {
 		Log.Fatal("[Internal Error] Trying to List Image Tags from an Image which Name is not set!!")
 		return nil, errors.NewImageNameNotDefinedError()
@@ -558,6 +510,15 @@ func (i* Image) ListImageTags() ([]Tag, error) {
 	return i.Tags, nil
 }
 
+func (i *Image) GetTags() []rt.Tag { return i.Tags }
+
+func (i *Image) GetTagsPtr() *[]rt.Tag { return &i.Tags }
+
+func (i *Image) SetTags(tags []rt.Tag) { i.Tags = tags }
+
+func (i *Image) GetRegistryURI() string { return i.Repository.DockerRegistry.URI }
+
+func (i *Image) GetName() string { return i.Name }
 
 func (a *Auth) Init() { a.Cred.auth = a }
 
