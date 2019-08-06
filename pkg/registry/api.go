@@ -391,6 +391,8 @@ func (r *Repository) FetchAllImages() error {
 						Log.Fatalf("Error while Fetching Signatures for Image %s on S3 Server", newImage.Name)
 						memguard.SafeExit(1)
 					}
+				} else {
+					Log.Warningf("S3-Server Component was disabled by User Config")
 				}
 
 				r.Images = append(r.Images, newImage)
