@@ -126,6 +126,7 @@ func drawFunction() {
 	// TODO: move me to own Function
 	stats = widgets.NewList()
 	stats.Title = "Registry Stats"
+	updateStats()
 	stats.TextStyle = ui.NewStyle(ui.ColorYellow)
 	stats.WrapText = false
 	stats.SetRect(0, 0, 25, 8)
@@ -155,6 +156,18 @@ func drawFunction() {
 
 	// render and show the UI
 	ui.Render(grid)
+}
+
+// updateStats() Updates Registry Statistics
+func updateStats() {
+	regStats := dockerReg.Stats()
+
+	stats.Rows = []string{
+		fmt.Sprintf("Repositories: %8d", regStats.Repos),
+		fmt.Sprintf("Images:       %8d", regStats.Images),
+		fmt.Sprintf("Tags:         %8d", regStats.Tags),
+		fmt.Sprintf("S3Signatures: %8d", regStats.S3Signatures),
+	}
 }
 
 func getTree() []*TreeNode {
