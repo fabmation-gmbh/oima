@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/awnumar/memguard"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -309,8 +310,12 @@ func (r *DockerRegistry) FetchAll() error {
 	// wait on for-loop
 	wg.Wait()
 
-			// fetch Images from repo
-			Log.Debugf("Fetching Images for Repo '%s'", repo.Name)
+	// TODO: (1) Test Time with a Lot of Repos/ Images/ Tags
+	// TODO: (2) Implement own sort Algorithm to improve runtime?
+	// TODO:   => (eg) by calling a DockerRegistry.AddRepo(...) Function
+	// TODO:      and this functions adds the Repo at the optimal place
+	// sort Repos (this increases the runtime about +6,4281014 %)
+	sort.Slice(r.Repos, func(i, j int) bool { return r.Repos[i].Name < r.Repos[j].Name 	})
 
 	if retErr != nil { return retErr }
 
@@ -414,10 +419,14 @@ func (r *Repository) FetchAllImages() error {
 	// wait for For-Loop
 	wg.Wait()
 
-			r.Images = append(r.Images, newImage)
-			Log.Debugf("--> Add new Image: %s", newImage.Name)
-		}
-	}
+	// INFO: This is commented out because it increases the runtime about +94 %
+	//		 And sorted Images aren't really important
+	//// TODO: (1) Test Time with a Lot of Repos/ Images/ Tags
+	//// TODO: (2) Implement own sort Algorithm to improve runtime?
+	//// TODO:   => (eg) by calling a Repository.AddImage(...) Function
+	//// TODO:      and this functions adds the Repo at the optimal place
+	//// sort Images
+	//sort.Slice(r.Images, func(i, j int) bool { return r.Images[i].Name < r.Images[j].Name 	})
 
 	return nil
 }
