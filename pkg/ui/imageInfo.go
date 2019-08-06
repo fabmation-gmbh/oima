@@ -187,15 +187,18 @@ func (ii *ImageInfo) ScrollBottom() {
 func (ii *ImageInfo) updateTagInfo() {
 	if ii.ImageTagInfo != nil {
 		// get S3 Signature Status
-		var s3Signature string
-		if !conf.S3.Enabled { s3Signature = "[S3 Component Disabled](fg:red)" }
-		// TODO: Implement S3 Signature Check
+		var s3SignatureStatus string
+		if !conf.S3.Enabled {
+			s3SignatureStatus = "[S3 Component Disabled](fg:red)"
+		} else {
+
+		}
 
 		ii.ImageTagInfo.Rows = []string{
 			"",
 			fmt.Sprintf("[Tag Name:](mod:bold,fg:clear)              %s", (*ii.Rows)[ii.SelectedRow].Name),
 			fmt.Sprintf("[Content Digest:](mod:bold,fg:clear)        %s", (*ii.Rows)[ii.SelectedRow].ContentDigest),
-			fmt.Sprintf("[Signature found in S3:](mod:bold,fg:clear) %s", s3Signature),
+			fmt.Sprintf("[Signature found in S3:](mod:bold,fg:clear) %s", s3SignatureStatus),
 			"[](fg:clear)",
 		}
 	} else {
