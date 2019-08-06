@@ -23,35 +23,45 @@ package cmd
 
 import (
 	"fmt"
+	. "github.com/fabmation-gmbh/oima/internal/log"
+	"github.com/fabmation-gmbh/oima/pkg/registry"
 
 	"github.com/spf13/cobra"
+
+	"os"
 )
 
 // statsCmd represents the stats command
 var statsCmd = &cobra.Command{
 	Use:   "stats",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Shows Stats of the Registry",
+	Long: `Shows Statistics of the Registry like
+Number of Repositories, Images, Tags, ...`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("stats called")
+		// ATTENTION: This is only for testing/ debugging!
+		var dockerRegistry registry.DockerRegistry
+		err := dockerRegistry.Init()
+		if err != nil {
+			Log.Panicf("Error while Initialize DockerRegistry: %s", err.Error())
+		}
+
+		err = dockerRegistry.FetchAll()
+		if err != nil {
+			Log.Fatalf("Error while Fetching All Informations from Registry '%s': %s", dockerRegistry.URI, err.Error())
+			os.Exit(1)
+		}
+
+		stats := dockerRegistry.Stats()
+		fmt.Printf(
+			"\n\n>>>>> Statistics for Registry %s <<<<<\n\n" +
+				"Repositories: %8d\n" +
+			"Images:       %8d\n" +
+			"Tags:         %8d\n" +
+			"S3Signatures: %8d\n",
+			dockerRegistry.URI, stats.Repos, stats.Images, stats.Tags, stats.S3Signatures)
 	},
 }
 
 func init() {
 	registryCmd.AddCommand(statsCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// statsCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// statsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
