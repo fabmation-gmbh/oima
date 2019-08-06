@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-resty/resty"
@@ -255,45 +256,64 @@ func (r *DockerRegistry) FetchAll() error {
 		memguard.SafeExit(1)
 	}
 
-	var skipRepo bool
+	var wg sync.WaitGroup
+	wg.Add(len(catalog))
+
+	var retErr error
+	retErr = nil
+
 	for _, val := range catalog {
-		// if Entry does not contain a '/' it means that it is a Image
-		if strings.Contains(val, "/") {
-			repoName := strings.Split(val, "/")
-			lenRepos := len(repoName)
-			var name string
-			for i, v := range repoName {
-				if i == (lenRepos - 1) { break }
+		go func(val string) {
+			defer wg.Done()
 
-				// prevent adding a Slash to the last Repo Entry Name
-				if i != (lenRepos -2 ) {
-					name += fmt.Sprintf("%s/", v)
-				} else { name += v }
+			// if Entry does not contain a '/' it means that it is a Image
+			if strings.Contains(val, "/") {
+				repoName := strings.Split(val, "/")
+				lenRepos := len(repoName)
+				var name string
+				for i, v := range repoName {
+					if i == (lenRepos - 1) { break }
+
+					// prevent adding a Slash to the last Repo Entry Name
+					if i != (lenRepos -2 ) {
+						name += fmt.Sprintf("%s/", v)
+					} else { name += v }
+				}
+
+				repo := Repository{
+					DockerRegistry: r,
+					Name:           name,
+					Images:         nil,
+				}
+
+				// check if a Repo already exists with that Name
+				for _, repoV := range r.Repos { if repoV.Name == name { return } }
+
+				// fetch Images from repo
+				Log.Debugf("Fetching Images for Repo '%s'", repo.Name)
+
+				err := repo.FetchAllImages()
+				if err != nil {
+					Log.Fatalf("Error while Fetching all Images: %s", err.Error())
+					retErr = err
+					wg.Done()
+					return
+				}
+
+				r.Repos = append(r.Repos, repo)
+				Log.Debugf("-- New Repo Entry: %s", repo.Name)
 			}
+		}(val)
+	}
 
-			repo := Repository{
-				DockerRegistry: r,
-				Name:           name,
-				Images:         nil,
-			}
-
-			// check if a Repo already exists with that Name
-			for _, repoV := range r.Repos { if repoV.Name == name { skipRepo = true; break } }
-			if skipRepo { skipRepo = false; continue }
+	// wait on for-loop
+	wg.Wait()
 
 			// fetch Images from repo
 			Log.Debugf("Fetching Images for Repo '%s'", repo.Name)
 
-			err := repo.FetchAllImages()
-			if err != nil {
-				Log.Fatalf("Error while Fetching all Images: %s", err.Error())
-				return err
-			}
+	if retErr != nil { return retErr }
 
-			r.Repos = append(r.Repos, repo)
-			Log.Debugf("-- New Repo Entry: %s", repo.Name)
-		}
-	}
 	return nil
 }
 
@@ -355,29 +375,44 @@ func (r *Repository) FetchAllImages() error {
 		memguard.SafeExit(1)
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(len(catalog))
+
 	for _, v := range catalog {
-		if r.Images == nil { r.Images = []Image{} }
-		// check if Entry is an Image or an Repo
-		if (strings.Contains(v, r.Name) || r.Name == "/") && !strings.HasSuffix(v, "/") {
-			// check if Repo is Root of the Registry
-			if r.Name != "/"{
-				// check if Image is Entry of an Sub-Repo
-				// (eg 'nextcloud' is a Entry of the Sub-Repo 'library' in 'docker.io/library/nextcloud')
-				if strings.Count(v, "/") > (strings.Count(r.Name, "/") + 1) { continue }
-			} else { if strings.Count(v, "/") > 0 { continue } }
+		go func(v string) {
+			defer wg.Done()
 
-			newImage := Image{
-				Repository: r,
-				Name:       v,
-				Tags:       nil,
-			}
+			if r.Images == nil { r.Images = []Image{} }
+			// check if Entry is an Image or an Repo
+			if (strings.Contains(v, r.Name) || r.Name == "/") && !strings.HasSuffix(v, "/") {
+				// check if Repo is Root of the Registry
+				if r.Name != "/"{
+					// check if Image is Entry of an Sub-Repo
+					// (eg 'nextcloud' is a Entry of the Sub-Repo 'library' in 'docker.io/library/nextcloud')
+					if strings.Count(v, "/") > (strings.Count(r.Name, "/") + 1) { return }
+				} else { if strings.Count(v, "/") > 0 { return } }
 
-			// fetch Image Tags
-			err := newImage.FetchAllTags()
-			if err != nil {
-				Log.Fatalf("Error while Fetching Tags of Image '%s': %s", newImage.Name, err.Error())
-				memguard.SafeExit(1)
+				newImage := Image{
+					Repository: r,
+					Name:       v,
+					Tags:       nil,
+				}
+
+				// fetch Image Tags
+				err := newImage.FetchAllTags()
+				if err != nil {
+					Log.Fatalf("Error while Fetching Tags of Image '%s': %s", newImage.Name, err.Error())
+					memguard.SafeExit(1)
+				}
+
+				r.Images = append(r.Images, newImage)
+				Log.Debugf("--> Add new Image: %s", newImage.Name)
 			}
+		}(v)
+	}
+
+	// wait for For-Loop
+	wg.Wait()
 
 			r.Images = append(r.Images, newImage)
 			Log.Debugf("--> Add new Image: %s", newImage.Name)
@@ -442,32 +477,56 @@ func (i *Image) FetchAllTags() error {
 		Log.Fatalf("Error while marshaling Response: %s", err.Error())
 		memguard.SafeExit(1)
 	}
+	var retErr error
+	retErr = nil
 
-	var imageData = imageInfo{
-		name: i.Name,
-		tag:  "",
-	}
+	var wg sync.WaitGroup
+	wg.Add(len(tags.Tags))
 
-	newTag := Tag{
-		TagName:       "",
-		ContentDigest: "",
-	}
 	for _, v := range tags.Tags {
-		imageData.tag = v
-		newTag.TagName = _Tag(v)
+		go func(v string) {
+			defer wg.Done()
 
-		// get Image-Tag Digest
-		newTag.ContentDigest, err = getTagDigest(&authData, imageData,
+			var imageData = imageInfo{
+				name: i.Name,
+				tag:  "",
+			}
+
+			newTag := Tag{
+				TagName:       "",
+				ContentDigest: "",
+			}
+
+			imageData.tag = v
+			newTag.TagName = _Tag(v)
+
+			// get Image-Tag Digest
+			newTag.ContentDigest, err = getTagDigest(&authData, imageData,
 				i.Repository.DockerRegistry.URI, i.Repository.DockerRegistry.Version)
-		if err != nil {
-			Log.Fatalf("Error while getting Image-Tag Digest: %s", err.Error())
-			return err
-		}
+			if err != nil {
+				Log.Fatalf("Error while getting Image-Tag Digest: %s", err.Error())
+				retErr = err
+				wg.Done()
+				return
+			}
 
-		// add Tag to the other Tags
-		i.Tags = append(i.Tags, newTag)
-		Log.Debugf("==> Digest (%s:%s): %s", i.Name, imageData.tag, newTag.ContentDigest)
+			// add Tag to the other Tags
+			i.Tags = append(i.Tags, newTag)
+			Log.Debugf("==> Digest (%s:%s): %s", i.Name, imageData.tag, newTag.ContentDigest)
+		}(v)
 	}
+
+	// wait for the for loop
+	wg.Wait()
+
+	if retErr != nil { return retErr }
+
+	// TODO: (1) Test Time with a Lot of Repos/ Images/ Tags
+	// TODO: (2) Implement own sort Algorithm to improve runtime?
+	// TODO:   => (eg) by calling a Image.AddTag(...) Function
+	// TODO:      and this functions adds the Repo at the optimal place
+	// sort Tags (this increases the runtime about +58,581839 %)
+	sort.Slice(i.Tags, func(index, j int) bool { return i.Tags[index].TagName < i.Tags[j].TagName })
 
 	return nil
 }
