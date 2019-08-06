@@ -29,6 +29,7 @@ import (
 
 	. "github.com/fabmation-gmbh/oima/internal/log"
 	"github.com/fabmation-gmbh/oima/pkg/registry"
+	rt "github.com/fabmation-gmbh/oima/pkg/registry/interfaces"
 )
 
 // listCmd represents the list command
@@ -81,14 +82,15 @@ var listCmd = &cobra.Command{
 
 				// check S3 Signature
 				// list Objects
-				err = minioS3.FetchSignatures(&img)
+				var _img rt.BaseImage = &img
+				err = minioS3.FetchSignatures(&_img)
 				if err != nil {
 					Log.Errorf("Error while checking Signature of Image: %s", err.Error())
 					memguard.SafeExit(1)
 				}
 
 				for _, tag := range tags { Log.Infof("  -- Tag: %s || Signature Found: %t || Content Digest: %s",
-																tag.TagName, tag.S3SignFound, tag.ContentDigest) }
+																tag.Name, tag.S3SignFound, tag.ContentDigest) }
 			}
 		}
 	},
