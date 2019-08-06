@@ -17,6 +17,8 @@ type Registry interface {
 	// Fetch _all_ Informations (Repos->Images->Tags) available in the Registry
 	FetchAll()			error
 
+	// Stats() returns Statistics of the Registry
+	Stats()				Stats
 
 	/// >>>>>>>>>> Getter & Setter <<<<<<<<<<
 
