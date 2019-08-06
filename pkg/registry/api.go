@@ -125,6 +125,22 @@ func (r *DockerRegistry) Init() error {
 	// set parent Pointer back to this struct
 	r.Authentication.dockerRegistry = r
 
+	// initialize S3 Server
+	if conf.S3.Enabled {
+		Log.Debugf("Initializing S3 Object")
+		r.s3Enabled = true
+		r.s3Cli = &s3.S3Minio{}
+
+		err := r.s3Cli.InitS3()
+		if err != nil {
+			Log.Fatalf("Error while Initializing S3 Struct: %s", err.Error())
+			return err
+		} else { Log.Notice("S3 Struct initialized successfully") }
+
+	} else {
+		Log.Debugf("S3 Server Component was disabled by User Conf.")
+	}
+
 	// Initialize Auth Struct
 	b, _ := strconv.ParseBool(conf.Registry.RequireAuth)
 	r.Authentication.Required = b
@@ -160,23 +176,6 @@ func (r *DockerRegistry) Init() error {
 		return err
 	}
 	r.Repos = append(r.Repos, repo)
-
-
-	// initialize S3 Server
-	if conf.S3.Enabled {
-		Log.Debugf("Initializing S3 Object")
-		r.s3Enabled = true
-		r.s3Cli = &s3.S3Minio{}
-
-		err = r.s3Cli.InitS3()
-		if err != nil {
-			Log.Fatalf("Error while Initializing S3 Struct: %s", err.Error())
-			return err
-		} else { Log.Notice("S3 Struct initialized successfully") }
-
-	} else {
-		Log.Debugf("S3 Server Component was disabled by User Conf.")
-	}
 
 	return nil
 }
