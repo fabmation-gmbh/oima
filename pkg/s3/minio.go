@@ -99,6 +99,8 @@ func (auth *S3AuthMinio) InitAuth() error {
 		memguard.SafeExit(1)
 	}
 
+	Log.Debugf("MinIO S3 Client initialization finished")
+
 	return nil
 }
 
