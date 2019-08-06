@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/awnumar/memguard"
 	"github.com/minio/minio-go"
-	"regexp"
 	"strings"
 
 	"github.com/fabmation-gmbh/oima/internal"
@@ -52,8 +51,7 @@ func (s *S3Minio) FetchSignatures(image *rt.BaseImage) error {
 	tags := (*image).GetTags()
 
 	// create object Path Prefix
-	r, _ := regexp.Compile("http(s)?://")					// remove 'https://' or 'http://'
-	registryName := strings.ReplaceAll(r.ReplaceAllString((*image).GetRegistryURI(), ""), "/", "")
+	registryName := PrepareRegPath((*image).GetRegistryURI())
 	objPathPrefix := fmt.Sprintf("%s/%s@", registryName, (*image).GetName())
 
 	doneCh := make(chan struct{})
