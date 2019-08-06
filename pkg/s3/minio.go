@@ -42,6 +42,8 @@ func (s *S3Minio) InitS3() error {
 
 // SignatureExists() checks if all Signatures of all
 func (s *S3Minio) FetchSignatures(image *rt.BaseImage) error {
+	Log.Debugf("Fetching Signatures for Image %s", (*image).GetName())
+
 	//// check if @image is Empty
 	//if len((*image).GetTags()) == 0 {
 	//	Log.Fatal("Requested Image is Empty (empty Struct)!")
