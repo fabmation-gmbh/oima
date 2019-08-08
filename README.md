@@ -22,12 +22,12 @@ This CLI does not have any sub-commands (coming soon), but it has a working term
 ```bash
 oima Manages OCI/ Docker Image Signatures in your 'sigstore'.
 
-It's impossible to keep track of all signatures.
+It is very difficult to manually keep track of all signatures.
 
 Example: Say you have to remove the signature for the
 Docker image 'docker.io/library/hello_world:vulnerable':
 then you have to determine the digest of the image and
-manually delete the directory/ signature.
+manually delete the directory / signature.
 
 This tool automates this process and helps to keep
 track of all signed images.
