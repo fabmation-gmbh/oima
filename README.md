@@ -24,10 +24,10 @@ oima Manages OCI/ Docker Image Signatures in your 'sigstore'.
 
 It's impossible to keep track of all signatures.
 
-Example: you have to remove the signature for the
-Docker image 'docker.io/library/hello_world:vulnerable'
-- then you have to determine the digest of the image and
-manually delete the directory/ dignature.
+Example: Say you have to remove the signature for the
+Docker image 'docker.io/library/hello_world:vulnerable':
+then you have to determine the digest of the image and
+manually delete the directory/ signature.
 
 This tool automates this process and helps to keep
 track of all signed images.
@@ -45,7 +45,7 @@ Flags:
       --config string   Which config file to use (default is $HOME/.oima.yaml).
       --debug           Print debug messages (defaults to false).
   -h, --help            Display help for oima.
-      --version         Display ersion of oima.
+      --version         Display version of oima.
 
 Use "oima [command] --help" for more information about a command.
 ```
@@ -70,4 +70,4 @@ Enter, Space            Expand/ collapse a tree node.
 ### `Image Info UI`
 
 All tags of an image are listed in the _Image Info UI_.
-Here you can check if a tag is signed (or has a Signature) and delete signatures.
+Here you can check if a tag is signed (or has a signature) and delete signatures.
