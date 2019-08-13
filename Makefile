@@ -14,4 +14,4 @@ gen:
 
 .PHONY: build
 build: gen
-	go build -o oima -ldflags $(LD_FLAGS) .	
+	go build -o oima -ldflags $(LD_FLAGS)

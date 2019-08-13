@@ -1,0 +1,65 @@
+Without Multithreading
+======================
+18 Images
+---------
+
+#0
+./oima image list  0,30s user 0,09s system 16% cpu 2,443 total
+./oima image list  0,32s user 0,07s system 14% cpu 2,833 total
+./oima image list  0,30s user 0,09s system 15% cpu 2,530 total
+
+	==>        0,306s     0,083s               2,602
+
+
+With Multithreading
+===================
+18 Images
+---------
+
+#1	(Tags)			// TODO: Must sort Tags
+	./oima image list  0,37s user 0,08s system 24% cpu 1,859 total
+	./oima image list  0,40s user 0,10s system 26% cpu 1,926 total
+	./oima image list  0,37s user 0,11s system 20% cpu 2,344 total
+
+	==>		   0,38s      0,096s		   2,043
+								(#0) -21,483474 %
+
+#2	(Tags + Images)		// TODO: Must sort Tags + Images
+
+	./oima image list  0,42s user 0,08s system 52% cpu 0,960 total
+	./oima image list  0,41s user 0,10s system 23% cpu 2,134 total
+	./oima image list  0,38s user 0,07s system 39% cpu 1,172 total
+
+	==>						   1,422
+								(#0) -45,349731 %
+								(#1) -30,396476 %
+
+
+#3	(Tags + Images + Repos)	// TODO: Must sort Tags + Images + Repos
+
+	./oima image list  0,51s user 0,07s system 50% cpu 1,138 total
+	./oima image list  0,48s user 0,09s system 43% cpu 1,314 total
+	./oima image list  0,39s user 0,07s system 81% cpu 0,566 total
+
+	==>						   1,006
+                                                                (#0) -61,337433 %
+                                                                (#1) -50,758688 %
+								(#2) -29,254571 %
+
+
+--- Sort
+#1 [based of #3]		Sort Repos
+
+	==>			1,0706667
+						+6,4281014 %
+
+#2 [based of #3]                Sort Repos + Images
+
+	==>			1,954
+						+94,234592 %
+
+#3 [based of #3]                Sort Repos + Tags
+	
+
+	==>			1,5953333
+						+58,581839 %

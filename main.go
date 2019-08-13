@@ -15,8 +15,17 @@ limitations under the License.
 */
 package main
 
-import "github.com/fabmation-gmbh/oima/cmd"
+import (
+	"github.com/awnumar/memguard"
+	"github.com/fabmation-gmbh/oima/cmd"
+)
 
 func main() {
-  cmd.Execute()
+	// let Memguard catch Interrupts before starting the CLI
+	memguard.CatchInterrupt()
+
+	// purge Memguard Session when returning
+	defer memguard.Purge()
+
+	cmd.Execute()
 }

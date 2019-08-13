@@ -9,3 +9,19 @@ import:
 - package: golang.org/x/crypto
   subpackages:
   - ssh/terminal
+- package: github.com/google/go-containerregistry
+  subpackages:
+  - pkg/crane
+- package: github.com/apsdehal/go-logger
+  version: ~1.3.0
+- package: github.com/awnumar/memguard
+  version: v0.18.2
+- package: github.com/go-resty/resty
+  version: ~2.0.0
+- package: github.com/gizak/termui
+  version: ~3.1.0
+  subpackages:
+  - v3
+  - v3/widgets
+- package: github.com/minio/minio-go
+  version: ^6.0.33

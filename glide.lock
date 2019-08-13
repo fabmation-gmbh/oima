@@ -1,8 +1,27 @@
-hash: a7c2fb5d204cd47e5708e7cf9ff1da0ae60cdfbb4675240b434edfa4dcf1db23
-updated: 2019-08-02T00:09:49.201336339+02:00
+hash: 1122c8d5c653aa8d90b084e5dd769d7816a78d7b4eda459feb84a117f314fb3e
+updated: 2019-08-05T17:33:51.182165514+02:00
 imports:
+- name: github.com/apsdehal/go-logger
+  version: 1abdf898e0242cf7027d832c3e95388315c25de6
+- name: github.com/awnumar/memguard
+  version: e3e7b95f838b7332c78c736aba627517e76b2315
+  subpackages:
+  - core
+  - memcall
 - name: github.com/fsnotify/fsnotify
   version: 1485a34d5d5723fea214f5710708e19a831720e4
+- name: github.com/gizak/termui
+  version: 4cca61d83fa2cc0f485c478ff768b0108f6591d6
+  subpackages:
+  - v3
+  - v3/drawille
+  - v3/widgets
+- name: github.com/go-resty/resty
+  version: d467d573085e42a848cb49c1c28ba163b7aa5872
+- name: github.com/google/go-containerregistry
+  version: ef12d49c8daf6a6d72978966d5945e39bb898b4a
+  subpackages:
+  - pkg/crane
 - name: github.com/hashicorp/hcl
   version: cf7d376da96d9cecec7c7483cec2735efe54a410
   subpackages:
@@ -19,10 +38,18 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/magiconair/properties
   version: de8848e004dd33dc07a2947b3d76f618a7fc7ef1
+- name: github.com/mattn/go-runewidth
+  version: 703b5e6b11ae25aeb2af9ebb5d5fdf8fa2575211
+- name: github.com/minio/minio-go
+  version: be06703be060e0c0c0505f31a3781b8908a32a00
 - name: github.com/mitchellh/go-homedir
   version: af06845cf3004701891bf4fdb884bfe4920b3727
+- name: github.com/mitchellh/go-wordwrap
+  version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/mitchellh/mapstructure
   version: 53818660ed4955e899c0bcafa97299a388bd7c8e
+- name: github.com/nsf/termbox-go
+  version: eeb6cd0a176293eeb2c69270d83835972e3567bc
 - name: github.com/pelletier/go-toml
   version: 84da2c4a25c585816f2c4211b699228d111d18ab
 - name: github.com/spf13/afero
@@ -39,13 +66,25 @@ imports:
   version: 24fa6976df40757dce6aea913e7b81ade90530e1
 - name: github.com/spf13/viper
   version: b5bf975e5823809fb22c7644d008757f78a4259e
+- name: gitlab.com/NebulousLabs/fastrand
+  version: 603482d69e405db4890e654c9807b4c772e86c81
 - name: golang.org/x/crypto
   version: de0752318171da717af4ce24d0a2e8626afaeb11
   subpackages:
+  - blake2b
+  - internal/subtle
+  - nacl/secretbox
+  - poly1305
+  - salsa20/salsa
   - ssh/terminal
+- name: golang.org/x/net
+  version: 65e2d4e15006aab9813ff8769e768bbf4bb667a0
+  subpackages:
+  - publicsuffix
 - name: golang.org/x/sys
   version: b90733256f2e882e81d52f9126de08df5615afd9
   subpackages:
+  - cpu
   - unix
   - windows
 - name: golang.org/x/text

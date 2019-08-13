@@ -16,24 +16,37 @@ limitations under the License.
 package cmd
 
 import (
-  "fmt"
-  "github.com/spf13/cobra"
-  "os"
+	"fmt"
+	"github.com/fabmation-gmbh/oima/pkg/s3"
+	"os"
 
-  "github.com/spf13/viper"
+	"github.com/apsdehal/go-logger"
+	"github.com/awnumar/memguard"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
-  "github.com/fabmation-gmbh/oima/internal"
+	"github.com/fabmation-gmbh/oima/internal"
+	. "github.com/fabmation-gmbh/oima/internal/log"
+	"github.com/fabmation-gmbh/oima/pkg/config"
+	"github.com/fabmation-gmbh/oima/pkg/credential"
+	"github.com/fabmation-gmbh/oima/pkg/ui"
 )
 
 
-var cfgFile string
+var (
+	cfgFile string		// Application Config File
+	debug	bool		// Print Debug Messages
+)
+
+var Config config.Configuration
 var applicationName = os.Args[0]
 
 var rootCmd = &cobra.Command{
- Use:   "oima <command> [flags]",
- Short: "oima Manages OCI/ Docker Image Signatures in you 'sigstore'",
- Long: `oima Manages OCI/ Docker Image Signatures in you 'sigstore'.
-Why? Because its impossible to keep track of all Signatures.
+	Use:   "oima <command> [flags]",
+	Short: "OCI/ Docker Image Signature Management Tool",
+	Long: `oima Manages OCI/ Docker Image Signatures in you 'sigstore'.
+
+Its impossible to keep track of all Signatures.
 
 For Example, you have to remove the Signature for the
 Docker Image 'docker.io/library/hello_world:vulnerable',
@@ -42,46 +55,91 @@ manually delete the Directory/ Signature.
 
 This Tool automates this Process and helps to keep
 track of all signed Images.`,
-  Version: internal.GetVersion(),
-  Run: run,
-}
+	Version: internal.GetVersion(),
+	Run: func(cmd *cobra.Command, args []string) { ui.StartUI()	},
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// initialize CredStore struct
+		internal.Cred = new(credential.CredStore)
 
+		// set Log Level
+		if debug {
+			Log.SetLogLevel(logger.DebugLevel)
+		}
 
-func run(cmd *cobra.Command, args []string) {
-  // TODO
+		Config = internal.GetConfig()
+
+		// map Credentials into CredStore
+		if len(Config.Registry.Password) > 0 {
+			// map User Password into CredStore
+			err := internal.Cred.AddCredential("password", []byte(Config.Registry.Password))
+			if err != nil {
+				Log.Fatal(err.Error())
+			}
+		}
+
+		// map S3 Credentials into CredStore
+		if Config.S3.Enabled {
+			// copy S3 access Key ID into CredStore
+			err := internal.Cred.AddCredential("s3_accessKeyID", []byte(Config.S3.AccessKeyID))
+			if err != nil { Log.Fatal(err.Error()); memguard.SafeExit(1) }
+
+			// copy S3 Secret access Key into CredStore
+			err = internal.Cred.AddCredential("s3_secretAccessKeyID", []byte(Config.S3.SecretAccessKey))
+			if err != nil { Log.Fatal(err.Error()); memguard.SafeExit(1) }
+
+			// initialize S3
+			S3Data := &s3.S3Minio{}
+			err = S3Data.InitS3()
+			if err != nil {
+				Log.Fatalf("Error while initializing MinIO S3 Client: %s", err.Error())
+				memguard.SafeExit(1)
+			}
+		} else {
+			Log.Debugf("The S3 Component of this CLI was disabled by User Configuration.")
+		}
+	},
 }
 
 func Execute() {
-  if err := rootCmd.Execute(); err != nil {
-    fmt.Println(err)
-    os.Exit(1)
-  }
+	if err := rootCmd.Execute(); err != nil {
+		Log.Error(err.Error())
+		memguard.SafeExit(1)
+	}
+
+	memguard.SafeExit(0)
 }
 
 func init() {
-  cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initConfig)
 
-  rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oima.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oima.yaml)")
+	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Print Debug Messages (defaults to false)")
 
-
-  //rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-
 func initConfig() {
-  if cfgFile != "" {
-    viper.SetConfigFile(cfgFile)
-  } else {
-    viper.AddConfigPath("$HOME/.oima.yaml")
-    viper.AddConfigPath(".")
-  }
+	viper.SetConfigName(".oima")
 
-  viper.AutomaticEnv() // read in environment variables that match
+	if cfgFile != "" {
+		viper.SetConfigFile(cfgFile)
+	} else {
+		viper.AddConfigPath("$HOME")
+		viper.AddConfigPath(".")
+	}
 
-  if err := viper.ReadInConfig(); err == nil {
-    fmt.Println("Using config file:", viper.ConfigFileUsed())
-  } else {
-    _ = fmt.Errorf("No Config File found! Maybe run '%s configure' first?", applicationName)
-    os.Exit(1)
-  }
+	viper.AutomaticEnv() // read in environment variables that match
+
+	// unmarshal Config struct
+	err := viper.Unmarshal(&Config)
+	if err != nil {
+		_ = fmt.Errorf("unable to decode into struct, %v", err.Error())
+	}
+
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	} else {
+		fmt.Printf("No Config File found! Maybe run '%s configure' first\n", applicationName)
+		memguard.SafeExit(1)
+	}
 }
